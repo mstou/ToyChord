@@ -16,5 +16,6 @@ def update_previous_request(targetNode, port, ip, cur_previous):
 def join_successful_request(target, previous, next):
     url = HTTP + target.get_address() + '/join_successful'
     params = f'{NEXT_PORT}={next.get_port()}&{NEXT_IP}={next.get_ip()}' +\
-             f'{PREV_PORT}={previous.get_port()}&{PREV_IP}={previous.get_ip()}'
+             f'&{PREV_PORT}={previous.get_port()}&{PREV_IP}={previous.get_ip()}'
+    print(f'Requesting page {url + "?" + params}')
     requests.get(url + '?' + params)

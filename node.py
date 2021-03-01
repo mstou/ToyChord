@@ -10,7 +10,7 @@ from flask import abort, request
 from lib.id_utils import create_id, is_id_in_range
 from lib.request_utils import *
 
-my_ip = get_ip()
+my_ip = get_ip(True)
 my_port  = sys.argv[1]
 bootstrap_node = Node('localhost', '5000')
 
@@ -25,7 +25,7 @@ next     = None
 
 @app.route('/log', methods=['GET'])
 def log():
-    return f'Myself: {me}\n\nNext: {next}\n\nPrevious: {previous}'
+    return f'Myself: {me}<br/><br/>Next: {next}<br/><br/>Previous: {previous}'
 
 '''
 Notifies us that we have been successfully added to ToyChord.
@@ -41,10 +41,16 @@ def join_successful():
     global previous
     global next
 
-    if (PORT not in request.args) or (IP not in request.args):
+    if (NEXT_PORT not in request.args) or (NEXT_IP not in request.args):
+        print('here 1')
+        abort(BAD_REQUEST)
+
+    if (PREV_PORT not in request.args) or (PREV_IP not in request.args):
+        print('here 1')
         abort(BAD_REQUEST)
 
     if previous != None and next != None:
+        print('here 2')
         abort(BAD_REQUEST)
 
     next_port = request.args.get(NEXT_PORT)
@@ -54,6 +60,8 @@ def join_successful():
 
     previous = Node(previous_ip, previous_port)
     next     = Node(next_ip, next_port)
+
+    return OK
 
 
 '''
@@ -78,7 +86,7 @@ def update_previous():
     new_ip   = request.args.get(IP)
     prev_id  = request.args.get(CUR_PREVIOUS)
 
-    if prev_id != previous.get_id():
+    if prev_id != previous.get_id_str():
         abort(UNAUTHORIZED)
 
     previous = Node(new_ip, new_port)
@@ -119,7 +127,7 @@ def join():
     elif is_id_in_range(new_id, me.get_id(), next.get_id()):
         print('Case 2\n')
         # Notify next to update previous
-        update_previous_request(next, req_port, req_ip, me.get_id())
+        update_previous_request(next, req_port, req_ip, me.get_id_str())
         join_successful_request(requester, me, next)
 
         next = Node(req_ip, req_port)
@@ -129,8 +137,11 @@ def join():
         # Propagate the join request to next_id
         join_request(next, req_port, req_ip)
 
+    return OK
+
 if not bootstrap:
-    threading.Thread(target=join_request, args=(bootstrap_node, my_port, my_ip))    
+    t = threading.Thread(target=join_request, args=(bootstrap_node, my_port, my_ip))
+    t.start()
 
 # TODO: we must open this in a new thread..
 app.run(port=int(my_port))
