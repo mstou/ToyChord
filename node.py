@@ -1,6 +1,7 @@
 import sys
 import flask
 import requests
+import threading
 from time import sleep
 from lib.constants import *
 from lib.get_ip import get_ip
@@ -24,7 +25,7 @@ next     = None
 
 @app.route('/log', methods=['GET'])
 def log():
-    return f'<h1>Myself: {me}\n\nNext: {next}\n\nPrevious: {previous}</h1>'
+    return f'Myself: {me}\n\nNext: {next}\n\nPrevious: {previous}'
 
 '''
 Notifies us that we have been successfully added to ToyChord.
@@ -128,10 +129,8 @@ def join():
         # Propagate the join request to next_id
         join_request(next, req_port, req_ip)
 
-
-
 if not bootstrap:
-    join_request(bootstrap_node, my_port, my_ip)
+    threading.Thread(target=join_request, args=(bootstrap_node, my_port, my_ip))    
 
 # TODO: we must open this in a new thread..
 app.run(port=int(my_port))

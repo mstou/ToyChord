@@ -1,7 +1,9 @@
 import requests
+from time import sleep
 from lib.constants import *
 
 def join_request(targetNode, port, ip):
+    sleep(5)
     url = HTTP + targetNode.get_address() + '/join'
     params = f'{PORT}={port}&{IP}={ip}'
     requests.get(url + '?' + params)
