@@ -3,14 +3,24 @@ from time import sleep
 from lib.constants import *
 
 def join_request(targetNode, port, ip):
-    sleep(5)
+    sleep(2)
     url = HTTP + targetNode.get_address() + '/join'
     params = f'{PORT}={port}&{IP}={ip}'
     requests.get(url + '?' + params)
 
-def update_previous_request(targetNode, port, ip, cur_previous):
-    url = HTTP + targetNode.get_address() + '/update_previous'
-    params = f'{PORT}={port}&{IP}={ip}&{CUR_PREVIOUS}={cur_previous}'
+def insert_request(targetNode, key, value):
+    url = HTTP + targetNode.get_address() + '/insert'
+    params = f'{KEY}={key}&{VALUE}={value}'
+    requests.get(url + '?' + params)
+
+def delete_request(targetNode, key):
+    url = HTTP + targetNode.get_address() + '/delete'
+    params = f'{KEY}={key}'
+    requests.get(url + '?' + params)
+
+def update_next_request(targetNode, port, ip, cur_next):
+    url = HTTP + targetNode.get_address() + '/update_next'
+    params = f'{PORT}={port}&{IP}={ip}&{CUR_NEXT}={cur_next}'
     requests.get(url + '?' + params)
 
 def join_successful_request(target, previous, next):

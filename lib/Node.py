@@ -7,6 +7,12 @@ class Node:
         self.port   = port
         self.id_str = self.id.hexdigest()
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.id_str == other.id_str
+        else:
+            return False
+
     def __str__(self):
         return f'Node listening at {self.ip}:{self.port}\n' +\
         f'Node id: {self.id_str}'
