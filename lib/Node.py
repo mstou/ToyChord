@@ -16,6 +16,13 @@ class Node:
     def __str__(self):
         return f'Node listening at {self.ip}:{self.port}\n' +\
         f'Node id: {self.id_str}'
+    
+    def json(self):
+        return {
+            'ip': self.ip,
+            'port': self.port,
+            'id': self.id_str
+        }
 
     def get_address(self):
         return f'{self.ip}:{self.port}'

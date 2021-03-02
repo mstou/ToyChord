@@ -32,12 +32,12 @@ if bootstrap:
 
 @app.route('/log', methods=['GET'])
 def log():
-    result = {}
-    result['me'] = str(me)
-    result['next'] = str(next)
-    result['previous'] = str(previous)
-    result['files'] = files
-
+    result = {
+        'me': me.json(),
+        'previous': previous.json(),
+        'next': next.json(),
+        'files': files,
+    }
     return jsonify(result)
 
 '''
