@@ -213,10 +213,35 @@ def delete():
 
     return OK
 
+'''
+Queries a key
+
+Parameters:
+    key = the key we are searching for
+'''
+@app.route('/query', methods=['GET'])
+def query():
+    if (KEY not in request.args):
+        abort(BAD_REQUEST)
+
+    key_str  = request.args.get(KEY)
+    key_hash = create_key(key_str)
+    key_hash_str  = key_hash.hexdigest()
+
+    if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
+
+        if key_hash_str in files:
+            return jsonify(files[key_hash_str])
+
+        return jsonify({})
+
+    # Propagate request
+    result = query_request(next, key_str)
+
+    return result.json()
 
 if not bootstrap:
     t = threading.Thread(target=join_request, args=(bootstrap_node, my_port, my_ip))
     t.start()
 
-# TODO: we must open this in a new thread..
 app.run(port=int(my_port))

@@ -18,6 +18,12 @@ def delete_request(targetNode, key):
     params = f'{KEY}={key}'
     requests.get(url + '?' + params)
 
+def query_request(targetNode, key):
+    url = HTTP + targetNode.get_address() + '/query'
+    params = f'{KEY}={key}'
+    result = requests.get(url + '?' + params)
+    return result
+
 def update_next_request(targetNode, port, ip, cur_next):
     url = HTTP + targetNode.get_address() + '/update_next'
     params = f'{PORT}={port}&{IP}={ip}&{CUR_NEXT}={cur_next}'
