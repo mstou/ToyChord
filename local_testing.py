@@ -15,7 +15,7 @@ def deploy(port, bootstrap=False):
 def pretty(response):
     return json.dumps(response.json(), indent=4, sort_keys=True)
 
-def log(port, verbose=False):
+def log(port, verbose=True):
     url = f'http://localhost:{port}/log'
     if verbose:
         print(f'-----------{url}------------------')
@@ -25,12 +25,29 @@ def log(port, verbose=False):
     return response.json()
 
 def insert(key, value, port):
-    print(f'inserting {key} -> {value}...', end=' ')
+    print(f'inserting at node {port}: {key} -> {value}...', end=' ')
     response = requests.get(f'http://localhost:{port}/insert?key={key}&value={value}')
     if response.status_code == 200:
         print('OK')
     else:
         print('\033[91mFAILED\033[0m') # red color
+
+def delete(key, port):
+    print(f'deleting key {key} from port {port}...', end=' ')
+    response = requests.get(f'http://localhost:{port}/delete?key={key}')
+    if response.status_code == 200:
+        print('OK')
+    else:
+        print('\033[91mFAILED\033[0m') # red color
+    
+
+def print_all_files(nodes):
+    for node in nodes:
+        print('-----------------------')
+        print(f"node {node['me']['port']} files:")
+        for key in node['files']:
+            print(f"{key} -> {node['files'][key]}")
+    print('--------------------------------')
 
 def main():
     t5000 = threading.Thread(target=deploy, args=(5000, 'bootstrap'))
@@ -56,12 +73,15 @@ def main():
     insert('key1', 'NikosKoukos', 5000)
     insert('key2', 'NikosKalantas', 3000)
     insert('key3', 'NikosKorompos', 4000)
+    insert('deleteme', 'KarbourdirisKostas', 5000)
     
     nodes = [log(5000), log(4000), log(3000)]
-    for node in nodes:
-        print('-----------------------')
-        print(f"node {node['me']['port']} files:")
-        print(node['files'])
+    print_all_files(nodes)
     
+    delete('deleteme', 4000)
+    
+    nodes = [log(5000), log(4000), log(3000)]
+    print_all_files(nodes)
+
 if __name__ == '__main__':
     main()
