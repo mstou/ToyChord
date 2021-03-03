@@ -7,7 +7,6 @@ def create_id(ip, port):
     return sha1(f'{ip}:{port}'.encode('utf-8'))
 
 def is_in_range(target, start, end):
-
     targetInt  = int(target, 16)
     startInt   = int(start, 16)
     endInt     = int(end, 16)

@@ -172,12 +172,10 @@ def insert():
     value    = request.args.get(VALUE)
     key_hash = create_key(key_str)
 
-    if is_in_range(key_hash.hexdigest(), previous.get_id(), me.get_id()):
-        print('here')
+    if is_in_range(key_hash.hexdigest(), previous.get_id_str(), me.get_id_str()):
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
 
     else:
-        print('here2')
         # Propagate request to next node
         insert_request(next, key_str, value)
 
