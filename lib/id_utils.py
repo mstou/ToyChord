@@ -14,13 +14,13 @@ def is_in_range(target, start, end):
     if startInt == endInt:
         return True
 
-    if targetInt > startInt and targetInt < endInt:
+    if targetInt > startInt and targetInt <= endInt:
         return True
 
-    if startInt > endInt and targetInt < endInt:
+    if startInt > endInt and targetInt <= endInt:
         return True
 
-    if startInt > endInt and targetInt > startInt:
+    if startInt >= endInt and targetInt > startInt:
         return True
 
     return False

@@ -140,11 +140,15 @@ def join():
         join_successful_request(requester, previous, me)
 
         new_previous = Node(req_ip, req_port)
+        keys_to_delete = []
 
         for key_hash in files:
-            if is_in_range(key_hash,  previous, new_previous):
+            if is_in_range(key_hash,  previous.get_id_str(), new_previous.get_id_str()):
                 insert_request(new_previous, files[key_hash]['name'], files[key_hash]['value'])
-                del files[key_hash]
+                keys_to_delete.append(key_hash)
+
+        for key_hash in keys_to_delete:
+            del files[key_hash]
 
         previous = new_previous
 
