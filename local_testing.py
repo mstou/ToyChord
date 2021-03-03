@@ -6,11 +6,17 @@ import requests
 import json
 from time import sleep
 
-def deploy(port, bootstrap=False):
-    if bootstrap:
-        subprocess.run(['python3', 'node.py', str(port), 'bootstrap'])
-    else:
-        subprocess.run(['python3', 'node.py', str(port)])
+PORTS = [5000, 4000, 3000]
+
+def deploy(port):
+    def aux(port):
+        if port == 5000:
+            subprocess.run(['python3', 'node.py', str(port), 'bootstrap'])
+        else:
+            subprocess.run(['python3', 'node.py', str(port)])
+    t = threading.Thread(target=aux, args=(port,))
+    t.start()
+    sleep(5)
 
 def pretty(response):
     return json.dumps(response.json(), indent=4, sort_keys=True)
@@ -39,9 +45,12 @@ def delete(key, port):
         print('OK')
     else:
         print('\033[91mFAILED\033[0m') # red color
-    
 
-def print_all_files(nodes):
+def all_nodes():
+    return [log(port) for port in PORTS]
+
+def print_all_files():
+    nodes = all_nodes()
     for node in nodes:
         print('-----------------------')
         print(f"node {node['me']['port']} files:")
@@ -49,39 +58,26 @@ def print_all_files(nodes):
             print(f"{key} -> {node['files'][key]}")
     print('--------------------------------')
 
-def main():
-    t5000 = threading.Thread(target=deploy, args=(5000, 'bootstrap'))
-    t3000 = threading.Thread(target=deploy, args=(3000,))
-    t4000 = threading.Thread(target=deploy, args=(4000,))
-    
-    server_threads = [t5000, t4000, t3000]
-    for server_thread in server_threads:
-        server_thread.start()
-        sleep(5)
-    
-    # servers are deployed at this point
-
-    node5000 = log(5000, verbose=True)
-    node4000 = log(4000, verbose=True)
-    node3000 = log(3000, verbose=True)
-    nodes = [node5000, node4000, node3000]
+def print_graph():
+    nodes = all_nodes()
     print('---------------------------------------------------')
     for node in nodes:
         print(f"{node['previous']['port']} <- {node['me']['port']} -> {node['next']['port']}")
     print('---------------------------------------------------')
+
+def main():
+    for port in PORTS:
+        deploy(port)
+    # servers are deployed at this point
+
+    print_graph()
+    
     sleep(1)
-    insert('key1', 'NikosKoukos', 5000)
-    insert('key2', 'NikosKalantas', 3000)
-    insert('key3', 'NikosKorompos', 4000)
-    insert('deleteme', 'KarbourdirisKostas', 5000)
+
+    for port in PORTS:
+        insert(f'127.0.0.1:{port}', f'testing port {port}', port)
     
-    nodes = [log(5000), log(4000), log(3000)]
-    print_all_files(nodes)
-    
-    delete('deleteme', 4000)
-    
-    nodes = [log(5000), log(4000), log(3000)]
-    print_all_files(nodes)
+    print_all_files()
 
 if __name__ == '__main__':
     main()
