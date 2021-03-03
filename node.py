@@ -197,7 +197,7 @@ def delete():
     key_str  = request.args.get(KEY)
     key_hash = create_key(key_str)
 
-    if is_in_range(key_hash, previous.get_id(), me.get_id()):
+    if is_in_range(key_hash.hexdigest(), previous.get_id_str(), me.get_id_str()):
         key_hash_str = key_hash.hexdigest()
 
         if key_hash_str in files:
