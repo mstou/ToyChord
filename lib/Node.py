@@ -13,6 +13,9 @@ class Node:
         else:
             return False
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __str__(self):
         return f'Node listening at {self.ip}:{self.port}\n' +\
         f'Node id: {self.id_str}'
