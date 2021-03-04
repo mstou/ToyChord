@@ -31,3 +31,10 @@ You can use the functions in `local_testing.py` or run:
 python local_testing.py
 ```
  to deploy some servers at different ports on the same machine and test.
+
+ 
+ To run the unit tests, simply run
+ ```bash
+ pytest
+ ```
+ in the root directory.
