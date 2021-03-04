@@ -6,9 +6,11 @@ import requests
 import json
 from time import sleep
 
-PORTS = [5000, 4000, 3000]
+PORTS = set()
 
 def deploy(port):
+    if port not in PORTS:
+        PORTS.add(port)
     def aux(port):
         if port == 5000:
             subprocess.run(['python3', 'node.py', str(port), 'bootstrap'])
@@ -66,8 +68,9 @@ def print_graph():
     print('---------------------------------------------------')
 
 def main():
-    for port in PORTS:
-        deploy(port)
+    deploy(5000)
+    deploy(4000)
+    deploy(3000)
     # servers are deployed at this point
 
     print_graph()
