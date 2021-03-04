@@ -20,6 +20,15 @@ def deploy(port):
     t.start()
     sleep(5)
 
+def depart(port):
+    print(f'Node at port {port} is departing', end=' ')
+    response = requests.get(f'http://localhost:{port}/depart')
+    if response.status_code == 200:
+        PORTS.remove(port)
+        print('OK')
+    else:
+        print('\033[91mFAILED\033[0m') # red color
+
 def pretty(response):
     return json.dumps(response.json(), indent=4, sort_keys=True)
 
