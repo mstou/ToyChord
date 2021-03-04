@@ -29,6 +29,15 @@ def update_next_request(targetNode, port, ip, cur_next):
     params = f'{PORT}={port}&{IP}={ip}&{CUR_NEXT}={cur_next}'
     requests.get(url + '?' + params)
 
+def update_prev_request(targetNode, port, ip, cur_prev):
+    url = HTTP + targetNode.get_address() + '/update_prev'
+    params = {
+        PORT: port,
+        IP: ip,
+        CUR_PREV: cur_prev,
+    }
+    requests.get(url, params=params)
+
 def join_successful_request(target, previous, next):
     url = HTTP + target.get_address() + '/join_successful'
     params = f'{NEXT_PORT}={next.get_port()}&{NEXT_IP}={next.get_ip()}' +\
