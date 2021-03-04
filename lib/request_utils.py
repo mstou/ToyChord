@@ -29,6 +29,11 @@ def update_next_request(targetNode, port, ip, cur_next):
     params = f'{PORT}={port}&{IP}={ip}&{CUR_NEXT}={cur_next}'
     requests.get(url + '?' + params)
 
+def get_all_files_request(targetNode):
+    url = HTTP + targetNode.get_address() + '/get_all_files'
+    result = requests.get(url)
+    return result
+
 def update_prev_request(targetNode, port, ip, cur_prev):
     url = HTTP + targetNode.get_address() + '/update_prev'
     params = {

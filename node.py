@@ -103,8 +103,17 @@ def update_next():
 
     return OK
 
-@app.route('/update_previous', methods=['GET'])
-def update_previous():
+'''
+Updates the previous node pointer. The update happens
+only if the current previous is requesting it.
+
+Parameters:
+    ip   = The ip of the remote machine that is now our previous node
+    port = The port that our new previous node will use to answer queries
+    current_next = Id of our current previous node
+'''
+@app.route('/update_prev', methods=['GET'])
+def update_prev():
     global previous
 
     if (PORT not in request.args) or\
@@ -234,6 +243,17 @@ def delete():
     return OK
 
 '''
+Returns all files and the pointer to the next node.
+'''
+@app.route('/get_all_files', methods=['GET'])
+def get_all_files():
+    result = {}
+    result['files'] = files
+    result['next'] = {'port': next.get_port(), 'ip': next.get_ip()}
+
+    return jsonify(result)
+
+'''
 Queries a key
 
 Parameters:
@@ -247,6 +267,20 @@ def query():
     key_str  = request.args.get(KEY)
     key_hash = create_key(key_str)
     key_hash_str  = key_hash.hexdigest()
+
+    if key_str == '*':
+        # Gather all files from all nodes
+        next_to_query = next
+        all_files = {}
+
+        while next_to_query != me:
+            response = get_all_files_request(next_to_query).json()
+            next_to_query = Node(response['next']['ip'], response['next']['port'])
+
+            all_files = {**all_files, **response['files']}
+
+        all_files = {**all_files, **files}
+        return jsonify(all_files)
 
     if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
 
@@ -262,10 +296,20 @@ def query():
 
 @app.route('/depart', methods=['GET'])
 def depart():
-    # update_previous(next)
-    # update_next(previous)
-    # send keys to next
 
+    update_prev_request(next, previous.get_port(), previous.get_ip(), me.get_id_str())
+    update_next_request(previous, next.get_port(), next.get_ip(), me.get_id_str())
+
+    all_keys = []
+
+    for key_hash in files:
+        insert_request(next, files[key_hash]['name'], files[key_hash]['value'])
+        all_keys.append(key_hash)
+
+    for key_hash in all_keys:
+        del files[key_hash]
+
+    return OK
 
 if not bootstrap:
     t = threading.Thread(target=join_request, args=(bootstrap_node, my_port, my_ip))
