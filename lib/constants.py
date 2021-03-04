@@ -1,9 +1,11 @@
+# URL related constants
 PORT  = 'port'
 IP    = 'ip'
 HTTP  = 'http://'
 KEY   = 'key'
 VALUE = 'value'
 CUR_NEXT = 'current_next'
+CUR_PREV = 'current_prev'
 NEXT_IP   = 'next_ip'
 NEXT_PORT = 'next_port'
 PREV_IP   = 'prev_ip'

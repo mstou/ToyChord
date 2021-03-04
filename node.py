@@ -103,6 +103,26 @@ def update_next():
 
     return OK
 
+@app.route('/update_previous', methods=['GET'])
+def update_previous():
+    global previous
+
+    if (PORT not in request.args) or\
+       (IP not in request.args) or\
+       (CUR_PREV not in request.args):
+        abort(BAD_REQUEST)
+
+    new_port = request.args.get(PORT)
+    new_ip   = request.args.get(IP)
+    prev_id  = request.args.get(CUR_PREV)
+
+    if prev_id != previous.get_id_str():
+        abort(UNAUTHORIZED)
+
+    previous = Node(new_ip, new_port)
+
+    return OK
+
 '''
 Endpoint that a node hits if it wants to join
 the system.
@@ -239,6 +259,13 @@ def query():
     result = query_request(next, key_str)
 
     return result.json()
+
+@app.route('/depart', methods=['GET'])
+def depart():
+    # update_previous(next)
+    # update_next(previous)
+    # send keys to next
+
 
 if not bootstrap:
     t = threading.Thread(target=join_request, args=(bootstrap_node, my_port, my_ip))
