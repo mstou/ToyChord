@@ -161,6 +161,35 @@ def increase_replicas_in_range():
         replicas[x] = {}
 
     return OK
+
+'''
+Increase the replica number of the file provided
+
+Parameters
+    key: the file's name
+'''
+@app.route('/increase_replica')
+def increase_replica():
+
+    if (KEY not in request.args):
+        abort(BAD_REQUEST)
+
+    key = request.args.get(KEY)
+    key_hash = create_key(key).hexdigest()
+
+    if key_hash in replicas[K-2]:
+        del replicas[K-2][key_hash]
+
+    else:
+        for i in range(K-2):
+            if key_hash in replicas[i]:
+                tmp = replicas[i][key_hash]
+                del replicas[i][key_hash]
+                replicas[i+1][key_hash] = tmp
+                break
+
+    return OK
+
 '''
 Insert a new replica
 
