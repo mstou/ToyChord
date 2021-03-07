@@ -33,6 +33,11 @@ def delete_request(targetNode, key):
     params = f'{KEY}={key}'
     requests.get(url + '?' + params)
 
+def delete_replica_request(targetNode, key, number):
+    url = HTTP + targetNode.get_address() + '/delete_replica'
+    params = f'{KEY}={key}&{NUMBER}={number}'
+    requests.get(url + '?' + params)
+
 def query_request(targetNode, key):
     url = HTTP + targetNode.get_address() + '/query'
     params = f'{KEY}={key}'

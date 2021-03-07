@@ -327,11 +327,40 @@ def delete():
         key_hash_str = key_hash.hexdigest()
 
         if key_hash_str in files:
+            delete_replica_request(next, files[key_hash_str]['name'], 0)
             del files[key_hash_str]
 
     else:
         # Propagate request to next node
         delete_request(next, key_str)
+
+    return OK
+
+'''
+Delete a replica of a file
+
+Parameters:
+    key    : The file's title
+    number : The replica number of the file
+'''
+@app.route('/delete_replica', methods=['GET'])
+def delete_replica():
+    if (KEY not in request.args):
+        abort(BAD_REQUEST)
+
+    key_str  = request.args.get(KEY)
+    key_hash = create_key(key_str).hexdigest()
+    number   = int(request.args.get(NUMBER))
+
+    if number > K-1 or number < 0:
+        abort(BAD_REQUEST)
+
+    if number == K-1:
+        return OK
+
+    if key_hash in replicas[number]:
+        del replicas[number][key_hash]
+        delete_replica_request(next, key_str, number+1)
 
     return OK
 
