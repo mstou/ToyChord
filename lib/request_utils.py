@@ -18,6 +18,16 @@ def insert_replica_request(targetNode, key, value, number):
     params = f'{KEY}={key}&{VALUE}={value}&{NUMBER}={number}'
     requests.get(url + '?' + params)
 
+def increase_replicas_in_range_request(targetNode, number):
+    url = HTTP + targetNode.get_address() + '/increase_replicas_in_range'
+    params = f'{NUMBER}={number}'
+    requests.get(url + '?' + params)
+
+def increase_replica_request(targetNode, key):
+    url = HTTP + targetNode.get_address() + '/increase_replica'
+    params = f'{KEY}={key}'
+    requests.get(url + '?' + params)
+
 def delete_request(targetNode, key):
     url = HTTP + targetNode.get_address() + '/delete'
     params = f'{KEY}={key}'
