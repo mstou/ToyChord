@@ -70,7 +70,7 @@ def query(key, port=5000, verbose=True):
     return response.json()
 
 def all_nodes():
-    return [log(port) for port in PORTS]
+    return [log(port, False) for port in PORTS]
 
 def print_all_files():
     nodes = all_nodes()
@@ -83,10 +83,19 @@ def print_all_files():
 
 def print_graph():
     nodes = all_nodes()
+    next = {node['me']['port']: node['next']['port'] for node in nodes}
     print('---------------------------------------------------')
-    for node in nodes:
-        print(f"{node['previous']['port']} <- {node['me']['port']} -> {node['next']['port']}")
-    print('---------------------------------------------------')
+    frontier = ['5000']
+    visited = set()
+    while frontier:
+        node = frontier[0]
+        visited.add(node)
+        print(f"{node} -> ", end='')
+        if next[node] not in visited:
+            frontier = [next[node]]
+        else:
+            frontier = []
+    print('...\n---------------------------------------------------')
 
 def main():
     deploy(5000)
