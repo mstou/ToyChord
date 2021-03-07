@@ -12,6 +12,7 @@ NEXT_PORT = 'next_port'
 PREV_IP   = 'prev_ip'
 PREV_PORT = 'prev_port'
 OK        = 'pong'
+PROPAGATE_REPLICAS = 'propagate_replicas'
 
 BAD_REQUEST  = 400
 UNAUTHORIZED = 401

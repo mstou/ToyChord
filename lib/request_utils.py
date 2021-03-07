@@ -8,14 +8,18 @@ def join_request(targetNode, port, ip):
     params = f'{PORT}={port}&{IP}={ip}'
     requests.get(url + '?' + params)
 
-def insert_request(targetNode, key, value):
+def insert_request(targetNode, key, value, propagate = True):
     url = HTTP + targetNode.get_address() + '/insert'
     params = f'{KEY}={key}&{VALUE}={value}'
+    if not propagate:
+        params += f'&{PROPAGATE_REPLICAS}=false'
     requests.get(url + '?' + params)
 
-def insert_replica_request(targetNode, key, value, number):
+def insert_replica_request(targetNode, key, value, number, propagate = True):
     url = HTTP + targetNode.get_address() + '/insert_replica'
     params = f'{KEY}={key}&{VALUE}={value}&{NUMBER}={number}'
+    if not propagate:
+        params += f'&{PROPAGATE_REPLICAS}=false'
     requests.get(url + '?' + params)
 
 def increase_replicas_in_range_request(targetNode, number):
@@ -23,9 +27,9 @@ def increase_replicas_in_range_request(targetNode, number):
     params = f'{NUMBER}={number}'
     requests.get(url + '?' + params)
 
-def increase_replica_request(targetNode, key):
+def increase_replica_request(targetNode, key, number):
     url = HTTP + targetNode.get_address() + '/increase_replica'
-    params = f'{KEY}={key}'
+    params = f'{KEY}={key}&{NUMBER}={number}'
     requests.get(url + '?' + params)
 
 def delete_request(targetNode, key):

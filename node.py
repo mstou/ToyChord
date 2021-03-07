@@ -75,7 +75,6 @@ def join_successful():
 
     previous = Node(previous_ip, previous_port)
     next     = Node(next_ip, next_port)
-    increase_replicas_in_range_request(next, 0)
 
     return OK
 
@@ -168,6 +167,7 @@ Increase the replica number of the file provided
 
 Parameters
     key: the file's name
+    number : the replica number
 '''
 @app.route('/increase_replica')
 def increase_replica():
@@ -177,6 +177,10 @@ def increase_replica():
 
     key = request.args.get(KEY)
     key_hash = create_key(key).hexdigest()
+    number = int(request.args.get(NUMBER))
+
+    if number == K-1:
+        return OK
 
     if key_hash in replicas[K-2]:
         del replicas[K-2][key_hash]
@@ -189,6 +193,8 @@ def increase_replica():
                 replicas[i+1][key_hash] = tmp
                 break
 
+    increase_replica_request(next, key, number+1)
+
     return OK
 
 '''
@@ -198,6 +204,7 @@ Parameters:
         number: the replica number
         key   : the file's name
         value : the file
+        propagate_replicas : Whether or not to propagate the request
 '''
 @app.route('/insert_replica')
 def insert_replica():
@@ -207,6 +214,7 @@ def insert_replica():
        (VALUE not in request.args):
         abort(BAD_REQUEST)
 
+    propagate = PROPAGATE_REPLICAS not in request.args
 
     key_str  = request.args.get(KEY)
     value    = request.args.get(VALUE)
@@ -218,7 +226,8 @@ def insert_replica():
 
     replicas[number][key_hash] = {'name': key_str, 'value': value}
 
-    insert_replica_request(next, key_str, value, number+1)
+    if propagate:
+        insert_replica_request(next, key_str, value, number+1)
 
     return OK
 
@@ -263,15 +272,32 @@ def join():
 
         for key_hash in files:
             if is_in_range(key_hash,  previous.get_id_str(), new_previous.get_id_str()):
-                insert_request(new_previous, files[key_hash]['name'], files[key_hash]['value'])
+                insert_request(new_previous, files[key_hash]['name'], files[key_hash]['value'], propagate = False)
                 files_to_replicas.append(key_hash)
+
+
+        for k in range(K-1):
+            for key_hash in replicas[k]:
+                insert_replica_request(requester,
+                                       replicas[k][key_hash]['name'],
+                                       replicas[k][key_hash]['value'],
+                                       k,
+                                       propagate = False)
+
+        if K >= 2:
+            replicas[K-2] = {}
+            for i in range(K-2, 0, -1):
+                replicas[i] = replicas[i-1]
+            replicas[0] = {}
 
         for key_hash in files_to_replicas:
             replicas[0][key_hash] = files[key_hash]
-            increase_replica_request(next, files[key_hash]['name'])
+            increase_replica_request(next, files[key_hash]['name'], 1)
             del files[key_hash]
 
+
         previous = new_previous
+        increase_replicas_in_range_request(next,1)
 
     else:
         # Propagate the join request to next_id
@@ -287,19 +313,24 @@ is propagated to the next node.
 Parameters:
     key: The file's title
     value: File's location
+    propagate_replicas : Whether or not to propagate replica requests
 '''
 @app.route('/insert', methods=['GET'])
 def insert():
     if (KEY not in request.args) or (VALUE not in request.args):
         abort(BAD_REQUEST)
 
-    key_str  = request.args.get(KEY)
-    value    = request.args.get(VALUE)
-    key_hash = create_key(key_str)
+    propagate = PROPAGATE_REPLICAS not in request.args
+
+    key_str   = request.args.get(KEY)
+    value     = request.args.get(VALUE)
+    key_hash  = create_key(key_str)
 
     if is_in_range(key_hash.hexdigest(), previous.get_id_str(), me.get_id_str()):
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
-        insert_replica_request(next, key_str, value, 0)
+
+        if propagate:
+            insert_replica_request(next, key_str, value, 0)
 
     else:
         # Propagate request to next node
