@@ -1,5 +1,5 @@
 import './App.css';
-import { Depart, Insert, Query, Log, Delete } from './components';
+import { Depart, Insert, Query, Log, Delete, Topology } from './components';
 
 const nodes = [
   '127.0.0.1:5000',
@@ -15,6 +15,7 @@ function App() {
       <Query nodes={nodes}/>
       <Log nodes={nodes}/>
       <Delete nodes={nodes}/>
+      <Topology />
     </div>
   );
 }
