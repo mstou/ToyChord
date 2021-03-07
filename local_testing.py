@@ -57,6 +57,18 @@ def delete(key, port):
     else:
         print('\033[91mFAILED\033[0m') # red color
 
+def query(key, port=5000, verbose=True):
+    url = f'http://localhost:{port}/query'
+    params = {
+        'key': key
+    }
+    if verbose:
+        print(f'----Query key={key}, url={url}----')
+    response = requests.get(url, params=params)
+    if verbose:
+        print(pretty(response))
+    return response.json()
+
 def all_nodes():
     return [log(port) for port in PORTS]
 
@@ -93,3 +105,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    p = print_all_files # to use with python shell
