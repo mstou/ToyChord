@@ -7,6 +7,13 @@ import json
 from time import sleep
 
 PORTS = set()
+K = 3
+
+def debug(s):
+    print('\033[96m' + s + '\033[0m')
+
+def print_error(s):
+    print(f'\033[91m{s}\033[0m')
 
 def deploy(port):
     if port not in PORTS:
@@ -47,7 +54,7 @@ def insert(key, value, port):
     if response.status_code == 200:
         print('OK')
     else:
-        print('\033[91mFAILED\033[0m') # red color
+        print_error('FAILED')
 
 def delete(key, port):
     print(f'deleting key {key} from port {port}...', end=' ')
@@ -97,6 +104,26 @@ def print_graph():
             frontier = []
     print('...\n---------------------------------------------------')
 
+def get_next_k(node, k, nodes):
+    curr = node
+    next_k = []
+    for _ in range(k):
+        curr = nodes[curr['next']['port']]
+        next_k.append(curr)
+    return next_k
+
+def test_replicas():
+    print('------Testing replicas-------')
+    nodes = {str(port): log(port, False) for port in PORTS}
+    for port, node in nodes.items():
+        next_k = get_next_k(node, K-1, nodes)
+        for key, file in node['files'].items():
+            for i, replica_node in enumerate(next_k):
+                if i >= len(replica_node['replicas']):
+                    print_error(f"Node {replica_node['me']['port']} does not have replicas at index {i}")
+                elif key not in replica_node['replicas'][i]:
+                    print_error(f"File with name {file['name']} and key {key} is not present in node not present in node {replica_node['me']['port']}")
+
 def main():
     deploy(5000)
     deploy(4000)
@@ -111,6 +138,9 @@ def main():
         insert(f'127.0.0.1:{port}', f'testing port {port}', port)
     
     print_all_files()
+
+    test_replicas()
+            
 
 if __name__ == '__main__':
     main()
