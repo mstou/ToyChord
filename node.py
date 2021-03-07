@@ -75,6 +75,7 @@ def join_successful():
 
     previous = Node(previous_ip, previous_port)
     next     = Node(next_ip, next_port)
+    increase_replicas_in_range_request(next, 0)
 
     return OK
 
@@ -221,7 +222,6 @@ def insert_replica():
 
     return OK
 
-
 '''
 Endpoint that a node hits if it wants to join
 the system.
@@ -259,14 +259,16 @@ def join():
         join_successful_request(requester, previous, me)
 
         new_previous = Node(req_ip, req_port)
-        keys_to_delete = []
+        files_to_replicas = []
 
         for key_hash in files:
             if is_in_range(key_hash,  previous.get_id_str(), new_previous.get_id_str()):
                 insert_request(new_previous, files[key_hash]['name'], files[key_hash]['value'])
-                keys_to_delete.append(key_hash)
+                files_to_replicas.append(key_hash)
 
-        for key_hash in keys_to_delete:
+        for key_hash in files_to_replicas:
+            replicas[0][key_hash] = files[key_hash]
+            increase_replica_request(next, files[key_hash]['name'])
             del files[key_hash]
 
         previous = new_previous
