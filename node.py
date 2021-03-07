@@ -15,7 +15,11 @@ my_ip = get_ip(True)
 my_port  = sys.argv[1]
 bootstrap_node = Node('localhost', '5000')
 
+# TODO: parse replica number from sys args
+K = 3
+
 files = {}
+replicas = [{} for k in range(K-1)]
 
 bootstrap = len(sys.argv) > 2 and sys.argv[2] == 'bootstrap'
 
@@ -37,6 +41,7 @@ def log():
         'previous': previous.json(),
         'next': next.json(),
         'files': files,
+        'replicas': replicas
     }
     return jsonify(result)
 
@@ -133,6 +138,62 @@ def update_prev():
     return OK
 
 '''
+Increase the replica number of all the replicas that
+have a replica number above x
+
+Parameters
+    number: x
+'''
+@app.route('/increase_replicas_in_range')
+def increase_replicas_in_range():
+
+    if (NUMBER not in request.args):
+        abort(BAD_REQUEST)
+
+    x = int(request.args.get(NUMBER))
+
+    if x <= K-2:
+        replicas[K-2] = {}
+
+        for i in range(K-2, x, -1):
+            replicas[i] = replicas[i-1]
+
+        replicas[x] = {}
+
+    return OK
+'''
+Insert a new replica
+
+Parameters:
+        number: the replica number
+        key   : the file's name
+        value : the file
+'''
+@app.route('/insert_replica')
+def insert_replica():
+
+    if (NUMBER not in request.args) or\
+       (KEY not in request.args) or\
+       (VALUE not in request.args):
+        abort(BAD_REQUEST)
+
+
+    key_str  = request.args.get(KEY)
+    value    = request.args.get(VALUE)
+    number   = int(request.args.get(NUMBER))
+    key_hash = create_key(key_str).hexdigest()
+
+    if number >= K-1:
+        return OK
+
+    replicas[number][key_hash] = {'name': key_str, 'value': value}
+
+    insert_replica_request(next, key_str, value, number+1)
+
+    return OK
+
+
+'''
 Endpoint that a node hits if it wants to join
 the system.
 
@@ -207,6 +268,7 @@ def insert():
 
     if is_in_range(key_hash.hexdigest(), previous.get_id_str(), me.get_id_str()):
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
+        insert_replica_request(next, key_str, value, 0)
 
     else:
         # Propagate request to next node
@@ -280,7 +342,7 @@ def query():
             all_files = {**all_files, **response['files']}
 
         all_files = {**all_files, **files}
-        return jsonify(all_files)
+        return jsonify(list(all_files.values()))
 
     if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
 

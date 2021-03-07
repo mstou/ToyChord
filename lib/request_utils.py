@@ -13,6 +13,11 @@ def insert_request(targetNode, key, value):
     params = f'{KEY}={key}&{VALUE}={value}'
     requests.get(url + '?' + params)
 
+def insert_replica_request(targetNode, key, value, number):
+    url = HTTP + targetNode.get_address() + '/insert_replica'
+    params = f'{KEY}={key}&{VALUE}={value}&{NUMBER}={number}'
+    requests.get(url + '?' + params)
+
 def delete_request(targetNode, key):
     url = HTTP + targetNode.get_address() + '/delete'
     params = f'{KEY}={key}'
