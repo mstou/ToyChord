@@ -4,10 +4,10 @@ Toychord is an implementation of Chord distributed hash table in Python.
 
 ## Installation
 
-To install all dependencies run
+To install all dependencies, make sure you are using python 3 (preferably inside a virtual environment) and run
 
 ```bash
-pip3 install -r requirements.txt
+python -m install -r requirements.txt
 ```
 ## Node Deployment
 
