@@ -114,15 +114,20 @@ def get_next_k(node, k, nodes):
 
 def test_replicas():
     print('------Testing replicas-------')
+    errors = False
     nodes = {str(port): log(port, False) for port in PORTS}
     for port, node in nodes.items():
         next_k = get_next_k(node, K-1, nodes)
         for key, file in node['files'].items():
             for i, replica_node in enumerate(next_k):
                 if i >= len(replica_node['replicas']):
+                    errors = True
                     print_error(f"Node {replica_node['me']['port']} does not have replicas at index {i}")
                 elif key not in replica_node['replicas'][i]:
                     print_error(f"File with name {file['name']} and key {key} is not present in node not present in node {replica_node['me']['port']}")
+                    errors = True
+    if not errors:
+        print('All replicas are in place' + ' \u2705')
 
 def main():
     deploy(5000)
