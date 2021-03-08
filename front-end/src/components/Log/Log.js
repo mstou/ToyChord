@@ -21,22 +21,22 @@ class Log extends React.Component {
 
   render() {
     return this.state.selectedNode ?
-      (<div>
-        <h1>Log</h1>
+      (<div className='p-3'>
+        <h2>Log</h2>
         <form onSubmit={this.handleSubmit}>
-          <label>
-            Select node:
+          <div className='form-group'>
+            <label>Select node</label>
+            <br/>
             <select value={this.state.value} onChange={this.handleChange}>
-
             {this.props.nodes.map(node => (
               <option key={node} value={node}>
                 {node}
               </option>
             ))}
-
             </select>
-          </label>
-          <input type="submit" value="Log" />
+          </div>
+
+          <input className="btn btn-primary" type="submit" value="Log" />
         </form>
       </div>)
       :

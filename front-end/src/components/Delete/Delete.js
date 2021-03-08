@@ -29,24 +29,25 @@ class Delete extends React.Component {
 
   render() {
     return (
-      <div>
-        <h1>Delete</h1>
+      <div className='p-3'>
+        <h2>Delete</h2>
         <form onSubmit={this.handleSubmit}>
-          <label>
-            Key:
+          <div className='form-group'>
+            <label>Key</label>
+            <br/>
             <input type="text" value={this.state.key} onChange={this.onKeyChange} />
-            Node:
+            <br/>
+            <label>Node</label>
+            <br/>
             <select value={this.state.node} onChange={this.onNodeChange}>
-
-            {this.props.nodes.map(node => (
-              <option key={node} value={node}>
-                {node}
-              </option>
-            ))}
-
+              {this.props.nodes.map(node => (
+                <option key={node} value={node}>
+                  {node}
+                </option>
+              ))}
             </select>
-          </label>
-          <input type="submit" value="Delete" />
+          </div>
+          <input className='btn btn-primary' type="submit" value="Delete" />
         </form>
       </div>
     );

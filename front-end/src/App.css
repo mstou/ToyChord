@@ -1,1 +1,18 @@
+* {
+    font-family: 'Manrope', sans-serif;
+}
+
+.light-gray {
+    background-color: #fefefe;
+}
+
+.debug {
+    background-color: red;
+}
+
+html, body, .app {
+    height:100%;
+}
+
+
 
