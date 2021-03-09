@@ -33,6 +33,17 @@ const LeftHalf = () => (
   </>
 );
 
+const RightHalf = () => (
+  <>
+    <div className='row'>
+      <Topology />
+    </div>
+    <div className='row'>
+      <PieChart />
+    </div>
+  </>
+);
+
 function App() {
   return (
     <div className='app container-fluid w-100 h-100 d-inline-block light-gray'>
@@ -40,15 +51,13 @@ function App() {
       <div className='p-4'>
         <div className='row'>
           <div className='col'>
-            {/* Right half */}
-            <Topology />
+            <RightHalf />
           </div>
           <div className='col'>
             <LeftHalf />
           </div>
         </div>
       </div>
-      <PieChart />
     </div>
   );
 }

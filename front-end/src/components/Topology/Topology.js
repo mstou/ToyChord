@@ -6,7 +6,7 @@ const [centerX, centerY] = [sizeX/2, sizeY/2];
 const D = 400;
 const d = 100;
 const R = D / 2;
-const r = d / 2;
+// const r = d / 2;
 const n = 7;
 const theta = 2 * Math.PI / n;
 
@@ -16,10 +16,9 @@ function Topology() {
   }
 
   const draw = p5 => {
-    p5.background(255, 130, 20)
 
     // draw network circle of radius R
-    p5.circle(centerX, centerY, D)
+    p5.circle(centerX, centerY, D);
 
     // draw node circles of radius r
     let angle = 0;
@@ -35,7 +34,13 @@ function Topology() {
     }
   }
 
-  return <Sketch setup={setup} draw={draw} />
+  return (
+    <div>
+      <h2 className='text-center'>Network topology</h2>
+      <Sketch setup={setup} draw={draw} />
+    </div>
+    );
+  
 }
 
 export default Topology;
