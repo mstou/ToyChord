@@ -13,7 +13,7 @@ def debug(s):
     print('\033[96m' + s + '\033[0m')
 
 def print_error(s):
-    print(f'\033[91m{s}\033[0m')
+    print(f'\u274c {s}')
 
 def deploy(port):
     if port not in PORTS:
