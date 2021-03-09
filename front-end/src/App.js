@@ -1,5 +1,5 @@
 import './App.css';
-import { Depart, Insert, Query, Log, Delete, Topology } from './components';
+import { Depart, Insert, Query, Log, Delete, Topology, PieChart } from './components';
 
 const nodes = [
   '127.0.0.1:5000',
@@ -48,6 +48,7 @@ function App() {
           </div>
         </div>
       </div>
+      <PieChart />
     </div>
   );
 }

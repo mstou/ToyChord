@@ -4,6 +4,7 @@ import { Query } from './Query';
 import { Log } from './Log';
 import { Delete } from './Delete';
 import { Topology } from './Topology';
+import { PieChart } from './PieChart';
 
 export {
   Depart,
@@ -11,5 +12,6 @@ export {
   Query,
   Log,
   Delete,
-  Topology
+  Topology,
+  PieChart
 };
