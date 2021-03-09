@@ -13,7 +13,7 @@ def debug(s):
     print('\033[96m' + s + '\033[0m')
 
 def print_error(s):
-    print(f'\033[91m{s}\033[0m')
+    print(f'\u274c {s}')
 
 def deploy(port):
     if port not in PORTS:
@@ -124,7 +124,7 @@ def test_replicas():
                     errors = True
                     print_error(f"Node {replica_node['me']['port']} does not have replicas at index {i}")
                 elif key not in replica_node['replicas'][i]:
-                    print_error(f"File with name {file['name']} and key {key} is not present in node not present in node {replica_node['me']['port']}")
+                    print_error(f"File with name {file['name']} and key {key} is not present in node {replica_node['me']['port']}")
                     errors = True
     if not errors:
         print('All replicas are in place' + ' \u2705')
