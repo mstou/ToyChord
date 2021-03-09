@@ -138,6 +138,43 @@ def update_prev():
     return OK
 
 '''
+Decrease the replica number of all the replicas that
+have a replica number above x
+
+Parameters
+    number: x
+'''
+@app.route('/decrease_replicas_in_range')
+def decrease_replicas_in_range():
+    global files
+
+    if (NUMBER not in request.args):
+        abort(BAD_REQUEST)
+
+    x = int(request.args.get(NUMBER))
+
+    if x == K-1:
+        return OK
+
+    if x == 0:
+        files = {**files, **replicas[0]}
+
+    for i in range(x, K-2):
+        replicas[i] = replicas[i+1]
+
+    replicas[K-2] = {}
+
+    decrease_replicas_in_range_request(next, x+1)
+
+    for key_hash in replicas[K-3]:
+        insert_replica_request(next,
+                               replicas[K-3][key_hash]['name'],
+                               replicas[K-3][key_hash]['value'],
+                               K-2, propagate = False)
+
+    return OK
+
+'''
 Increase the replica number of all the replicas that
 have a replica number above x
 
@@ -291,7 +328,7 @@ def join():
             replicas[0] = {}
 
         increase_replicas_in_range_request(next,1)
-        
+
         for key_hash in files_to_replicas:
             replicas[0][key_hash] = files[key_hash]
             increase_replica_request(next, files[key_hash]['name'], 1)
@@ -480,14 +517,10 @@ def depart():
     update_prev_request(next, previous.get_port(), previous.get_ip(), me.get_id_str())
     update_next_request(previous, next.get_port(), next.get_ip(), me.get_id_str())
 
-    all_keys = []
-
-    for key_hash in files:
-        insert_request(next, files[key_hash]['name'], files[key_hash]['value'])
-        all_keys.append(key_hash)
-
-    for key_hash in all_keys:
+    for key_hash in list(files.keys()):
         del files[key_hash]
+
+    decrease_replicas_in_range_request(next, 0)
 
     return OK
 

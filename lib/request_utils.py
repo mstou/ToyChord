@@ -27,6 +27,12 @@ def increase_replicas_in_range_request(targetNode, number):
     params = f'{NUMBER}={number}'
     requests.get(url + '?' + params)
 
+
+def decrease_replicas_in_range_request(targetNode, number):
+    url = HTTP + targetNode.get_address() + '/decrease_replicas_in_range'
+    params = f'{NUMBER}={number}'
+    requests.get(url + '?' + params)
+
 def increase_replica_request(targetNode, key, number):
     url = HTTP + targetNode.get_address() + '/increase_replica'
     params = f'{KEY}={key}&{NUMBER}={number}'
