@@ -179,7 +179,7 @@ def increase_replica():
     key_hash = create_key(key).hexdigest()
     number = int(request.args.get(NUMBER))
 
-    if number == K-1:
+    if number == K:
         return OK
 
     if key_hash in replicas[K-2]:
@@ -290,6 +290,8 @@ def join():
                 replicas[i] = replicas[i-1]
             replicas[0] = {}
 
+        increase_replicas_in_range_request(next,1)
+        
         for key_hash in files_to_replicas:
             replicas[0][key_hash] = files[key_hash]
             increase_replica_request(next, files[key_hash]['name'], 1)
@@ -297,7 +299,6 @@ def join():
 
 
         previous = new_previous
-        increase_replicas_in_range_request(next,1)
 
     else:
         # Propagate the join request to next_id
@@ -401,10 +402,35 @@ Returns all files and the pointer to the next node.
 @app.route('/get_all_files', methods=['GET'])
 def get_all_files():
     result = {}
-    result['files'] = files
+    result['files'] = replicas[K-2]
     result['next'] = {'port': next.get_port(), 'ip': next.get_ip()}
 
     return jsonify(result)
+
+'''
+Queries a key from a replica
+
+Parameters:
+    key = the key we are searching for
+    number = the replica we are looking for
+'''
+@app.route('/query_replica', methods=['GET'])
+def query_replica():
+    if (KEY not in request.args) or (NUMBER not in request.args):
+        abort(BAD_REQUEST)
+
+    key_str  = request.args.get(KEY)
+    key_hash = create_key(key_str)
+    key_hash_str  = key_hash.hexdigest()
+    number = int(request.args.get(NUMBER))
+
+    if number < K-2:
+        result = query_replica_request(next, key_str, number+1)
+        return result.json()
+
+    if number == K-2:
+        file = replicas[K-2][key_hash_str]
+        return jsonify(file)
 
 '''
 Queries a key
@@ -432,13 +458,14 @@ def query():
 
             all_files = {**all_files, **response['files']}
 
-        all_files = {**all_files, **files}
+        all_files = {**all_files, **replicas[K-2]}
         return jsonify(list(all_files.values()))
 
     if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
 
         if key_hash_str in files:
-            return jsonify(files[key_hash_str])
+            result = query_replica_request(next, key_str, 1)
+            return jsonify(result)
 
         return jsonify({})
 
