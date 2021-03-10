@@ -159,18 +159,21 @@ def decrease_replicas_in_range():
     if x == 0:
         files = {**files, **replicas[0]}
 
+    else:
+        replicas[x-1] = {**replicas[x-1], **replicas[x]}
+        
     for i in range(x, K-2):
         replicas[i] = replicas[i+1]
 
-    replicas[K-2] = {}
-
     decrease_replicas_in_range_request(next, x+1)
 
-    for key_hash in replicas[K-3]:
+    for key_hash in replicas[K-2]:
         insert_replica_request(next,
-                               replicas[K-3][key_hash]['name'],
-                               replicas[K-3][key_hash]['value'],
+                               replicas[K-2][key_hash]['name'],
+                               replicas[K-2][key_hash]['value'],
                                K-2, propagate = False)
+
+    replicas[K-2] = {}
 
     return OK
 
@@ -521,6 +524,12 @@ def depart():
         del files[key_hash]
 
     decrease_replicas_in_range_request(next, 0)
+
+    for key_hash in replicas[K-2]:
+        insert_replica_request(next,
+                               replicas[K-2][key_hash]['name'],
+                               replicas[K-2][key_hash]['value'],
+                               K-2, propagate = False)
 
     return OK
 
