@@ -18,6 +18,10 @@ bootstrap_node = Node('localhost', '5000')
 # TODO: parse replica number from sys args
 K = 3
 
+files_lock = threading.Semaphore()
+replicas_lock = threading.Semaphore()
+pointers_lock = threading.Semaphore()
+
 files = {}
 replicas = [{} for k in range(K-1)]
 
@@ -36,6 +40,10 @@ if bootstrap:
 
 @app.route('/log', methods=['GET'])
 def log():
+    files_lock.acquire()
+    replicas_lock.acquire()
+    pointers_lock.acquire()
+
     result = {
         'me': me.json(),
         'previous': previous.json(),
@@ -43,6 +51,11 @@ def log():
         'files': files,
         'replicas': replicas
     }
+
+    files_lock.release()
+    replicas_lock.release()
+    pointers_lock.release()
+
     return jsonify(result)
 
 '''
@@ -73,8 +86,12 @@ def join_successful():
     previous_port  = request.args.get(PREV_PORT)
     previous_ip    = request.args.get(PREV_IP)
 
+    pointers_lock.acquire()
+
     previous = Node(previous_ip, previous_port)
     next     = Node(next_ip, next_port)
+
+    pointers_lock.release()
 
     return OK
 
@@ -104,7 +121,9 @@ def update_next():
     if next_id != next.get_id_str():
         abort(UNAUTHORIZED)
 
+    pointers_lock.acquire()
     next = Node(new_ip, new_port)
+    pointers_lock.release()
 
     return OK
 
@@ -133,7 +152,9 @@ def update_prev():
     if prev_id != previous.get_id_str():
         abort(UNAUTHORIZED)
 
+    pointers_lock.acquire()
     previous = Node(new_ip, new_port)
+    pointers_lock.release()
 
     return OK
 
@@ -156,12 +177,15 @@ def decrease_replicas_in_range():
     if x == K-1:
         return OK
 
-    if x == 0:
-        files = {**files, **replicas[0]}
+    replicas_lock.acquire()
 
+    if x == 0:
+        files_lock.acquire()
+        files = {**files, **replicas[0]}
+        files_lock.release()
     else:
         replicas[x-1] = {**replicas[x-1], **replicas[x]}
-        
+
     for i in range(x, K-2):
         replicas[i] = replicas[i+1]
 
@@ -174,6 +198,7 @@ def decrease_replicas_in_range():
                                K-2, propagate = False)
 
     replicas[K-2] = {}
+    replicas_lock.release()
 
     return OK
 
@@ -192,6 +217,8 @@ def increase_replicas_in_range():
 
     x = int(request.args.get(NUMBER))
 
+    replicas_lock.acquire()
+
     if x <= K-2:
         replicas[K-2] = {}
 
@@ -199,6 +226,8 @@ def increase_replicas_in_range():
             replicas[i] = replicas[i-1]
 
         replicas[x] = {}
+
+    replicas_lock.release()
 
     return OK
 
@@ -222,6 +251,8 @@ def increase_replica():
     if number == K:
         return OK
 
+    replicas_lock.acquire()
+
     if key_hash in replicas[K-2]:
         del replicas[K-2][key_hash]
 
@@ -233,6 +264,7 @@ def increase_replica():
                 replicas[i+1][key_hash] = tmp
                 break
 
+    replicas_lock.release()
     increase_replica_request(next, key, number+1)
 
     return OK
@@ -264,7 +296,9 @@ def insert_replica():
     if number >= K-1:
         return OK
 
+    replicas_lock.acquire()
     replicas[number][key_hash] = {'name': key_str, 'value': value}
+    replicas_lock.release()
 
     if propagate:
         insert_replica_request(next, key_str, value, number+1)
@@ -295,10 +329,13 @@ def join():
 
     new_id  = create_id(req_ip, req_port)
 
+    pointers_lock.acquire()
+
     if bootstrap and previous == me and next == me:
         previous = Node(req_ip, req_port)
         next     = Node(req_ip, req_port)
         sleep(1)
+        pointers_lock.release()
         join_successful_request(requester, me, me)
 
     # Checking if the new node is between us and the node after us
@@ -309,6 +346,9 @@ def join():
 
         new_previous = Node(req_ip, req_port)
         files_to_replicas = []
+
+        files_lock.acquire()
+        replicas_lock.acquire()
 
         for key_hash in files:
             if is_in_range(key_hash,  previous.get_id_str(), new_previous.get_id_str()):
@@ -340,8 +380,13 @@ def join():
 
         previous = new_previous
 
+        files_lock.release()
+        replicas_lock.release()
+        pointers_lock.release()
+
     else:
         # Propagate the join request to next_id
+        pointers_lock.release()
         join_request(next, req_port, req_ip)
 
     return OK
@@ -368,7 +413,10 @@ def insert():
     key_hash  = create_key(key_str)
 
     if is_in_range(key_hash.hexdigest(), previous.get_id_str(), me.get_id_str()):
+
+        files_lock.acquire()
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
+        files_lock.release()
 
         if propagate:
             insert_replica_request(next, key_str, value, 0)
@@ -398,9 +446,13 @@ def delete():
     if is_in_range(key_hash.hexdigest(), previous.get_id_str(), me.get_id_str()):
         key_hash_str = key_hash.hexdigest()
 
+        files_lock.acquire()
+
         if key_hash_str in files:
             delete_replica_request(next, files[key_hash_str]['name'], 0)
             del files[key_hash_str]
+
+        files_lock.release()
 
     else:
         # Propagate request to next node
@@ -430,9 +482,13 @@ def delete_replica():
     if number == K-1:
         return OK
 
+    replicas_lock.acquire()
+
     if key_hash in replicas[number]:
         del replicas[number][key_hash]
         delete_replica_request(next, key_str, number+1)
+
+    replicas_lock.release()
 
     return OK
 
@@ -441,9 +497,15 @@ Returns all files and the pointer to the next node.
 '''
 @app.route('/get_all_files', methods=['GET'])
 def get_all_files():
+    replicas_lock.acquire()
+    pointers_lock.acquire()
+
     result = {}
     result['files'] = replicas[K-2]
     result['next'] = {'port': next.get_port(), 'ip': next.get_ip()}
+
+    replicas_lock.release()
+    pointers_lock.release()
 
     return jsonify(result)
 
@@ -469,7 +531,10 @@ def query_replica():
         return result.json()
 
     if number == K-2:
+        replicas_lock.acquire()
         file = replicas[K-2][key_hash_str]
+        replicas_lock.release()
+
         return jsonify(file)
 
 '''
@@ -498,7 +563,10 @@ def query():
 
             all_files = {**all_files, **response['files']}
 
+        replicas_lock.acquire()
         all_files = {**all_files, **replicas[K-2]}
+        replicas_lock.release()
+
         return jsonify(list(all_files.values()))
 
     if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
@@ -516,9 +584,13 @@ def query():
 
 @app.route('/depart', methods=['GET'])
 def depart():
+    files_lock.acquire()
+    replicas_lock.acquire()
+    pointers_lock.acquire()
 
     update_prev_request(next, previous.get_port(), previous.get_ip(), me.get_id_str())
     update_next_request(previous, next.get_port(), next.get_ip(), me.get_id_str())
+
 
     for key_hash in list(files.keys()):
         del files[key_hash]
@@ -530,6 +602,10 @@ def depart():
                                replicas[K-2][key_hash]['name'],
                                replicas[K-2][key_hash]['value'],
                                K-2, propagate = False)
+
+    files_lock.release()
+    replicas_lock.release()
+    pointers_lock.release()
 
     return OK
 
