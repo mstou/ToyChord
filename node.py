@@ -571,20 +571,29 @@ def query():
         return jsonify(list(all_files.values()))
 
     pointers_lock.acquire()
-
     if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
 
         files_lock.acquire()
 
         if key_hash_str in files:
-
             files_lock.release()
-            result = query_replica_request(next, key_str, 1)
-
+            result = files[key_hash_str]
+            pointers_lock.release()
             return jsonify(result)
 
         return jsonify({})
 
+    replicas_lock.acquire()
+    for i in range(K-1):
+        if key_hash_str in replicas[i]:
+            result = replicas[i][key_hash_str]
+            replicas_lock.release()
+            pointers_lock.release()
+            return jsonify(result)
+
+    replicas_lock.release()
+
+    next_ = next
     pointers_lock.release()
 
     # Propagate request
