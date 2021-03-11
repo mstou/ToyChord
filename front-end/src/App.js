@@ -9,7 +9,7 @@ const nodes = [
 
 const LeftHalf = () => (
   <>
-    <div className='row'>
+    <div className='row pt-3'>
       <div className='col'>
         <Log nodes={nodes}/>
       </div>
@@ -17,7 +17,7 @@ const LeftHalf = () => (
         <Depart nodes={nodes}/>
       </div>
     </div>
-    <div className='row'>
+    <div className='row pt-3'>
       <div className='col'>
         <Query nodes={nodes}/>
       </div>
@@ -25,7 +25,7 @@ const LeftHalf = () => (
         <Delete nodes={nodes}/>
       </div>
     </div>
-    <div className='row'>
+    <div className='row pt-3'>
       <div className='col'>
         <Insert nodes={nodes}/>
       </div>
@@ -38,7 +38,7 @@ const RightHalf = () => (
     <div className='row'>
       <Topology />
     </div>
-    <div className='row'>
+    <div className='row mt-5'>
       <PieChart />
     </div>
   </>
@@ -46,7 +46,7 @@ const RightHalf = () => (
 
 function App() {
   return (
-    <div className='app container-fluid w-100 h-100 d-inline-block light-gray'>
+    <div className='app container-fluid w-100 d-inline-block light-gray'>
       <h1 className='text-center mt-4 p-3'>ToyChord</h1>
       <div className='p-4'>
         <div className='row'>

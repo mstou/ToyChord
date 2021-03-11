@@ -3,16 +3,9 @@
 }
 
 .light-gray {
-    background-color: #fefefe;
+    background-color: #ededed;
 }
 
 .debug {
     background-color: red;
 }
-
-html, body, .app {
-    height:100%;
-}
-
-
-

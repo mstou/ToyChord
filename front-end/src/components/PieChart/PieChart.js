@@ -14,7 +14,11 @@ const PieChart = (props) => {
           values: values,
           labels: labels},
         ]}
-        layout={ {width: 500, height: 500} }
+        layout= {{
+            width: 500, 
+            height: 500,
+            paper_bgcolor:"#FFF0",
+        }}
       />
     </div>
 )};
