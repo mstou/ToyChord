@@ -298,11 +298,11 @@ def insert_replica():
 
     replicas_lock.acquire()
     replicas[number][key_hash] = {'name': key_str, 'value': value}
-    replicas_lock.release()
 
     if propagate:
         insert_replica_request(next, key_str, value, number+1)
 
+    replicas_lock.release()
     return OK
 
 '''
@@ -416,10 +416,11 @@ def insert():
 
         files_lock.acquire()
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
-        files_lock.release()
 
         if propagate:
             insert_replica_request(next, key_str, value, 0)
+
+        files_lock.release()
 
     else:
         # Propagate request to next node
@@ -569,13 +570,22 @@ def query():
 
         return jsonify(list(all_files.values()))
 
+    pointers_lock.acquire()
+
     if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
 
+        files_lock.acquire()
+
         if key_hash_str in files:
+
+            files_lock.release()
             result = query_replica_request(next, key_str, 1)
+
             return jsonify(result)
 
         return jsonify({})
+
+    pointers_lock.release()
 
     # Propagate request
     result = query_request(next, key_str)
