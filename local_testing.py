@@ -16,13 +16,14 @@ def print_error(s):
     print(f'\u274c {s}')
 
 def deploy(port):
+    print(f'deploying server at port {port}')
     if port not in PORTS:
         PORTS.add(port)
     def aux(port):
         if port == 5000:
-            subprocess.run(['python3', 'node.py', str(port), 'bootstrap'])
+            subprocess.run(['python3', 'node.py', str(port), 'bootstrap'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
-            subprocess.run(['python3', 'node.py', str(port)])
+            subprocess.run(['python3', 'node.py', str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     t = threading.Thread(target=aux, args=(port,))
     t.start()
     sleep(5)
@@ -82,16 +83,15 @@ def all_nodes():
 def print_all_files():
     nodes = all_nodes()
     for node in nodes:
-        print('-----------------------')
         print(f"node {node['me']['port']} files:")
         for key in node['files']:
-            print(f"{key} -> {node['files'][key]}")
+            print(f"    {key} -> {node['files'][key]}")
     print('--------------------------------')
 
 def print_graph():
     nodes = all_nodes()
     next = {node['me']['port']: node['next']['port'] for node in nodes}
-    print('---------------------------------------------------')
+    print('Network topology: ', end='')
     frontier = ['5000']
     visited = set()
     while frontier:
@@ -102,7 +102,7 @@ def print_graph():
             frontier = [next[node]]
         else:
             frontier = []
-    print('...\n---------------------------------------------------')
+    print('...\n')
 
 def get_next_k(node, k, nodes):
     curr = node
@@ -134,19 +134,30 @@ def main():
     deploy(4000)
     deploy(3000)
     # servers are deployed at this point
-
     print_graph()
-    
     sleep(1)
-
+    print('Inserting some keys targeting the nodes')
     for port in PORTS:
         insert(f'127.0.0.1:{port}', f'testing port {port}', port)
-    
     print_all_files()
-
     test_replicas()
-            
+    print('Adding one more server')
+    
+    deploy(8000)
+    
+    insert('NikosKoukos', 'agorimou', 3000)
+    insert('NikosKalantas', 'DiaThalasseos', 5000)
+    test_replicas()
+    delete('NikosKoukos', 5000)
+    test_replicas()
+    
+    insert('deleteMe', 'now', 4000)
+    delete('deleteMe')
+    test_replicas()
+
+    print_all_files()
 
 if __name__ == '__main__':
     main()
     p = print_all_files # to use with python shell
+    t = test_replicas # 
