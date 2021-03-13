@@ -26,7 +26,7 @@ def deploy(port):
             subprocess.run(['python3', 'node.py', str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     t = threading.Thread(target=aux, args=(port,))
     t.start()
-    sleep(5)
+    sleep(10)
 
 def depart(port):
     print(f'Node at port {port} is departing', end=' ')
@@ -36,6 +36,8 @@ def depart(port):
         print('OK')
     else:
         print('\033[91mFAILED\033[0m') # red color
+
+    sleep(5)
 
 def pretty(response):
     return json.dumps(response.json(), indent=4, sort_keys=True)
@@ -142,22 +144,34 @@ def main():
     print_all_files()
     test_replicas()
     print('Adding one more server')
-    
+
     deploy(8000)
-    
     insert('NikosKoukos', 'agorimou', 3000)
     insert('NikosKalantas', 'DiaThalasseos', 5000)
     test_replicas()
     delete('NikosKoukos', 5000)
     test_replicas()
-    
+
     insert('deleteMe', 'now', 4000)
-    delete('deleteMe')
+    delete('deleteMe', 3000)
     test_replicas()
 
     print_all_files()
 
+    deploy(9000)
+    test_replicas()
+
+    files = ['asdlkjfpuo', 'alkjhw10912``asld', 'asdf123', '123adzxce', 'asldk']
+
+    for s in files:
+        insert(s, s + ' value', 3000)
+
+    test_replicas()
+
+    depart(8000)
+    test_replicas()
+
 if __name__ == '__main__':
     main()
     p = print_all_files # to use with python shell
-    t = test_replicas # 
+    t = test_replicas 
