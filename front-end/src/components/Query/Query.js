@@ -7,7 +7,8 @@ class Query extends React.Component {
 
     this.state = {
       key: '',
-      node: this.nodes[0]
+      node: this.nodes[0],
+      value: ''
     };
 
     this.onKeyChange = this.onKeyChange.bind(this);
@@ -20,12 +21,19 @@ class Query extends React.Component {
   }
 
   onNodeChange(event) {
-    this.setState({node: event.target.value});
+    this.setState({
+      node: event.target.value,
+      value: ''
+    });
   }
 
   handleSubmit(event) {
-    console.log(this.state);
-    alert('Querying key, node...');
+    console.log(this.state.key);
+    // query request to server...
+    const val = 'this is a test';
+    this.setState({
+      value: val
+    });
     event.preventDefault();
   }
 
@@ -51,6 +59,13 @@ class Query extends React.Component {
           </div>
           <input className='btn btn-primary' type="submit" value="Query" />
         </form>
+        {
+          this.state.value
+          ?
+          <p> Value: {this.state.value} </p>
+          :
+          <p> </p>
+        }
       </div>
     );
   }
