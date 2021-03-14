@@ -1,23 +1,44 @@
 import React from 'react';
+import Node from './LogNode';
 
 class Log extends React.Component {
   constructor(props) {
     super(props);
     this.nodes = props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
 
-    this.state = {selectedNode: this.nodes[0] || null }
+    this.state = {
+      selectedNode: this.nodes[0] || null,
+      index: 0,
+      log: false,
+    }
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleClear = this.handleClear.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleChange(event) {
-    this.setState({selectedNode: event.target.value});
+    const node = event.target.value;
+    const [ip, port] = node.split(':');
+    const index = this.props.nodes.findIndex(n => (
+      n.me.ip === ip && n.me.port === port
+    ));
+
+    this.setState({
+      selectedNode: event.target.value,
+      index: index
+    });
+  }
+
+  handleClear(event) {
+      this.setState({log: false});
   }
 
   handleSubmit(event) {
     console.log(this.state.selectedNode)
-    alert(`Node logged: ${this.state.selectedNode}`);
+    this.setState({
+      log: true
+    })
     event.preventDefault();
   }
 
@@ -29,8 +50,8 @@ class Log extends React.Component {
           <div className='form-group'>
             <label>Select node</label>
             <br/>
-            <select value={this.state.value} onChange={this.handleChange}>
-            {this.nodes.map(node => (
+            <select value={this.state.selectedNode} onChange={this.handleChange}>
+            {this.nodes.map((node, index) => (
               <option key={node} value={node}>
                 {node}
               </option>
@@ -40,6 +61,19 @@ class Log extends React.Component {
 
           <input className="btn btn-primary" type="submit" value="Log" />
         </form>
+        {
+          this.state.log
+          ?
+          <div>
+            <Node node={this.props.nodes[this.state.index]}/>
+            <button className="btn btn-primary" onClick={this.handleClear}>
+              Clear
+            </button>
+          </div>
+          :
+          <p> </p>
+
+        }
       </div>)
       :
       <p>No nodes in ToyChord...</p>
