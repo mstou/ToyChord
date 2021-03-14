@@ -62,7 +62,7 @@ class Query extends React.Component {
         {
           this.state.value
           ?
-          <p> Value: {this.state.value} </p>
+          <p className='mt-3'> Value: {this.state.value} </p>
           :
           <p> </p>
         }
