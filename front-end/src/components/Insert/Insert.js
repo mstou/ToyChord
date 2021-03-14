@@ -3,10 +3,11 @@ import React from 'react';
 class Insert extends React.Component {
   constructor(props) {
     super(props);
+    this.nodes = props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
     this.state = {
       key: '',
       value: '',
-      node: props.nodes[0]
+      node: this.nodes[0]
     };
 
     this.onKeyChange = this.onKeyChange.bind(this);
@@ -52,7 +53,7 @@ class Insert extends React.Component {
             <label>Node</label>
             <br/>
             <select value={this.state.node} onChange={this.onNodeChange}>
-              {this.props.nodes.map(node => (
+              {this.nodes.map(node => (
                 <option key={node} value={node}>
                   {node}
                 </option>

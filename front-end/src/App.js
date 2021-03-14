@@ -1,13 +1,8 @@
 import './App.css';
 import { Depart, Insert, Query, Log, Delete, Topology, PieChart } from './components';
+import nodes from './input.js';
 
-const nodes = [
-  '127.0.0.1:5000',
-  '127.1.0.0:4000',
-  '255.255.255.1:8000'
-];
-
-const LeftHalf = () => (
+const LeftHalf = ({nodes}) => (
   <>
     <div className='row pt-3'>
       <div className='col'>
@@ -33,13 +28,13 @@ const LeftHalf = () => (
   </>
 );
 
-const RightHalf = () => (
+const RightHalf = ({nodes}) => (
   <>
     <div className='row'>
-      <Topology />
+      <Topology nodes={nodes}/>
     </div>
     <div className='row mt-5'>
-      <PieChart />
+      <PieChart nodes={nodes}/>
     </div>
   </>
 );
@@ -51,15 +46,29 @@ function App() {
       <div className='p-4'>
         <div className='row'>
           <div className='col'>
-            <RightHalf />
+            <RightHalf nodes={nodes}/>
           </div>
           <div className='col'>
-            <LeftHalf />
+            <LeftHalf nodes={nodes}/>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+// function App() {
+//     return (
+//       <div>
+//         <Delete nodes={nodes} />
+//         <Depart nodes={nodes} />
+//         <Insert nodes={nodes} />
+//         <Log nodes={nodes} />
+//         <Query nodes={nodes} />
+//         <PieChart nodes={nodes} />
+//         <Topology nodes={nodes} />
+//       </div>
+//     )
+// }
 
 export default App;

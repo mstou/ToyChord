@@ -7,10 +7,12 @@ const D = 400;
 const d = 100;
 const R = D / 2;
 // const r = d / 2;
-const n = 7;
-const theta = 2 * Math.PI / n;
 
-function Topology() {
+function Topology(props) {
+  const nodes = props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
+  const n = nodes.length;
+  const theta = 2 * Math.PI / n;
+
   const setup = (p5, canvasParentRef) => {
     p5.createCanvas(sizeX, sizeY).parent(canvasParentRef)
   }
@@ -25,7 +27,7 @@ function Topology() {
     for (let i=0; i<n; i++) {
       const x = centerX + R * Math.sin(angle);
       const y = centerY + R * Math.cos(angle);
-      const text = '127.0.0.1:5000';
+      const text = nodes[i];
       p5.circle(x, y, d);
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.textSize(15);
@@ -40,7 +42,7 @@ function Topology() {
       <Sketch setup={setup} draw={draw} />
     </div>
     );
-  
+
 }
 
 export default Topology;

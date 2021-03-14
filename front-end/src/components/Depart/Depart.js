@@ -3,7 +3,9 @@ import React from 'react';
 class Depart extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {selectedNode: props.nodes[0] || null }
+    this.nodes = props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
+    this.state = {selectedNode: this.nodes[0] || null };
+    
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -28,7 +30,7 @@ class Depart extends React.Component {
             <label>Select node</label>
             <br/>
             <select value={this.state.value} onChange={this.handleChange}>
-            {this.props.nodes.map(node => (
+            {this.nodes.map(node => (
               <option key={node} value={node}>
                 {node}
               </option>
