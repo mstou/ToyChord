@@ -40,6 +40,9 @@ function Topology(props) {
     <div>
       <h2 className='text-center'>Network topology</h2>
       <Sketch setup={setup} draw={draw} />
+      <button className="btn btn-primary" onClick={props.handleReload}>
+        Reload
+      </button>
     </div>
     );
 

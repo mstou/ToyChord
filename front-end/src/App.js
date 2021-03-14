@@ -1,4 +1,5 @@
 import './App.css';
+import React from 'react';
 import { Depart, Insert, Query, Log, Delete, Topology, PieChart } from './components';
 import nodes from './input.js';
 
@@ -28,10 +29,10 @@ const LeftHalf = ({nodes}) => (
   </>
 );
 
-const RightHalf = ({nodes}) => (
+const RightHalf = ({nodes, handleReload}) => (
   <>
     <div className='row'>
-      <Topology nodes={nodes}/>
+      <Topology nodes={nodes} handleReload={handleReload}/>
     </div>
     <div className='row mt-5'>
       <PieChart nodes={nodes}/>
@@ -39,22 +40,34 @@ const RightHalf = ({nodes}) => (
   </>
 );
 
-function App() {
-  return (
-    <div className='app container-fluid w-100 d-inline-block light-gray'>
-      <h1 className='text-center mt-4 p-3'>ToyChord</h1>
-      <div className='p-4'>
-        <div className='row'>
-          <div className='col'>
-            <RightHalf nodes={nodes}/>
-          </div>
-          <div className='col'>
-            <LeftHalf nodes={nodes}/>
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleReload = this.handleReload.bind(this);
+  }
+
+  handleReload(event) {
+    alert("reload")
+  }
+
+  render() {
+    return (
+      <div className='app container-fluid w-100 d-inline-block light-gray'>
+        <h1 className='text-center mt-4 p-3'>ToyChord</h1>
+        <div className='p-4'>
+          <div className='row'>
+            <div className='col'>
+              <RightHalf nodes={nodes} handleReload={this.handleReload}/>
+            </div>
+            <div className='col'>
+              <LeftHalf nodes={nodes}/>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 // function App() {
