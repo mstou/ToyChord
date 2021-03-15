@@ -298,11 +298,15 @@ def insert_replica():
 
     replicas_lock.acquire()
     replicas[number][key_hash] = {'name': key_str, 'value': value}
+    replicas_lock.release()
 
     if propagate:
-        insert_replica_request(next, key_str, value, number+1)
+        updates = threading.Thread(
+                    target=insert_replica_request,
+                    args=(next, key_str, value, number+1)
+                    )
+        updates.start()
 
-    replicas_lock.release()
     return OK
 
 '''
