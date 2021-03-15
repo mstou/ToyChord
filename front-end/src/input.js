@@ -3,6 +3,10 @@ const node1 = {
         "955af05f3130ac5c70952a34a9aa710c9fbf812b": {
             "name": "127.0.0.1:3000",
             "value": "testing port 3000"
+        },
+        "1230123778434041": {
+          "name": "is this a second file?",
+          "value": "yes it is."
         }
     },
     "me": {
