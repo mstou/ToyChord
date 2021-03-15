@@ -420,11 +420,14 @@ def insert():
 
         files_lock.acquire()
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
+        files_lock.release()
 
         if propagate:
-            insert_replica_request(next, key_str, value, 0)
-
-        files_lock.release()
+            updates = threading.Thread(
+                            target=insert_replica_request,
+                            args=(next, key_str, value, 0)
+                            )
+            updates.start()
 
     else:
         # Propagate request to next node
@@ -454,7 +457,11 @@ def delete():
         files_lock.acquire()
 
         if key_hash_str in files:
-            delete_replica_request(next, files[key_hash_str]['name'], 0)
+            threading.Thread(
+                        target=delete_replica_request,
+                        args=(next, files[key_hash_str]['name'], 0)
+                        ).start()
+
             del files[key_hash_str]
 
         files_lock.release()
