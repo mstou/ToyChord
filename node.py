@@ -2,6 +2,7 @@ import sys
 import flask
 import requests
 import threading
+import argparse
 from time import sleep
 from lib.constants import *
 from lib.get_ip import get_ip
@@ -10,13 +11,29 @@ from flask import abort, request, jsonify
 from lib.id_utils import *
 from lib.request_utils import *
 
-# TODO: implement sys.arg flag for local testing
-my_ip = get_ip(True)
-my_port  = sys.argv[1]
+parser = argparse.ArgumentParser()
+parser.add_argument("--bootstrap", action="store_true")
+parser.add_argument("--local", action="store_true")
+parser.add_argument("--port", type=int)
+parser.add_argument("-k", type=int)
+args = parser.parse_args()
+
+if args.bootstrap:
+    print("Bootstrap node")
+print(args.port)
+print(args.k)
+
+bootstrap = args.bootstrap
+my_port  = args.port
+local_testing = args.local
+K = args.k
+
+my_ip = get_ip(local = local_testing)
+
+# TODO: change this to the oceanos public IP
+# when local_testing = False
 bootstrap_node = Node('localhost', '5000')
 
-# TODO: parse replica number from sys args
-K = 3
 
 files_lock = threading.Semaphore()
 replicas_lock = threading.Semaphore()
@@ -25,10 +42,8 @@ pointers_lock = threading.Semaphore()
 files = {}
 replicas = [{} for k in range(K-1)]
 
-bootstrap = len(sys.argv) > 2 and sys.argv[2] == 'bootstrap'
 
 app = flask.Flask(__name__)
-# app.config['DEBUG'] = True
 
 me       = Node(my_ip, my_port)
 previous = None

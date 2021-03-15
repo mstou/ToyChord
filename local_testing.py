@@ -19,11 +19,13 @@ def deploy(port):
     print(f'deploying server at port {port}')
     if port not in PORTS:
         PORTS.add(port)
+
     def aux(port):
+        command = f'python3 node.py --port {port} -k {K} --local'.split(' ')
         if port == 5000:
-            subprocess.run(['python3', 'node.py', str(port), 'bootstrap'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        else:
-            subprocess.run(['python3', 'node.py', str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            command.append('--bootstrap')
+        subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     t = threading.Thread(target=aux, args=(port,))
     t.start()
     sleep(10)
@@ -92,7 +94,7 @@ def print_all_files():
 
 def print_graph():
     nodes = all_nodes()
-    next = {node['me']['port']: node['next']['port'] for node in nodes}
+    next = {str(node['me']['port']): node['next']['port'] for node in nodes}
     print('Network topology: ', end='')
     frontier = ['5000']
     visited = set()
@@ -174,4 +176,4 @@ def main():
 if __name__ == '__main__':
     main()
     p = print_all_files # to use with python shell
-    t = test_replicas 
+    t = test_replicas
