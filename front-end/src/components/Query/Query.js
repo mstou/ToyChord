@@ -64,7 +64,7 @@ class Query extends React.Component {
           ?
           <p className='mt-3'> Value: {this.state.value} </p>
           :
-          <p> </p>
+          <p> Key not found </p>
         }
       </div>
     );
