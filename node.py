@@ -13,6 +13,7 @@ from lib.request_utils import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--bootstrap", action="store_true")
+parser.add_argument("--eventual", action="store_true")
 parser.add_argument("--local", action="store_true")
 parser.add_argument("--port", type=int)
 parser.add_argument("-k", type=int)
@@ -27,6 +28,7 @@ bootstrap = args.bootstrap
 my_port  = args.port
 local_testing = args.local
 K = args.k
+consistency = EVENTUAL if args.eventual else LINEARIZABILITY
 
 my_ip = get_ip(local = local_testing)
 
@@ -315,7 +317,14 @@ def insert_replica():
     replicas[number][key_hash] = {'name': key_str, 'value': value}
 
     if propagate:
-        insert_replica_request(next, key_str, value, number+1)
+        if consistency == EVENTUAL:
+            updates = threading.Thread(
+                        target=insert_replica_request,
+                        args=(next, key_str, value, number+1)
+                        )
+            updates.start()
+        else: # LINEARIZABILITY
+            insert_replica_request(next, key_str, value, number+1)
 
     replicas_lock.release()
     return OK
@@ -433,7 +442,14 @@ def insert():
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
 
         if propagate:
-            insert_replica_request(next, key_str, value, 0)
+            if consistency == EVENTUAL:
+                updates = threading.Thread(
+                                target=insert_replica_request,
+                                args=(next, key_str, value, 0)
+                                )
+                updates.start()
+            else: # LINEARIZABILITY
+                insert_replica_request(next, key_str, value, 0)
 
         files_lock.release()
 
@@ -465,7 +481,14 @@ def delete():
         files_lock.acquire()
 
         if key_hash_str in files:
-            delete_replica_request(next, files[key_hash_str]['name'], 0)
+            if consistency == EVENTUAL:
+                threading.Thread(
+                            target=delete_replica_request,
+                            args=(next, files[key_hash_str]['name'], 0)
+                            ).start()
+            else: # LINEARIZABILITY
+                delete_replica_request(next, files[key_hash_str]['name'], 0)
+
             del files[key_hash_str]
 
         files_lock.release()
@@ -590,20 +613,38 @@ def query():
     if is_in_range(key_hash_str, previous.get_id_str(), me.get_id_str()):
 
         files_lock.acquire()
+        pointers_lock.release()
 
         if key_hash_str in files:
 
             files_lock.release()
-            result = query_replica_request(next, key_str, 1)
+
+            if consistency == EVENTUAL:
+                result = files[key_hash_str]
+
+            else: # LINEARIZABILITY
+                result = query_replica_request(next, key_str, 1)
 
             return jsonify(result)
 
         return jsonify({})
 
+    next_ = next
     pointers_lock.release()
 
+    if consistency == EVENTUAL:
+        replicas_lock.acquire()
+        for i in range(K-1):
+            if key_hash_str in replicas[i]:
+                result = replicas[i][key_hash_str]
+                replicas_lock.release()
+                return jsonify(result)
+
+        replicas_lock.release()
+
+
     # Propagate request
-    result = query_request(next, key_str)
+    result = query_request(next_, key_str)
 
     return result.json()
 
