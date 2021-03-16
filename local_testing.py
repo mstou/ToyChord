@@ -7,7 +7,7 @@ import json
 from time import sleep
 
 PORTS = set()
-K = 3
+K = 5
 
 def debug(s):
     print('\033[96m' + s + '\033[0m')
@@ -137,6 +137,8 @@ def main():
     deploy(5000)
     deploy(4000)
     deploy(3000)
+    deploy(5050)
+    deploy(8080)
     # servers are deployed at this point
     print_graph()
     sleep(1)
@@ -148,6 +150,7 @@ def main():
     print('Adding one more server')
 
     deploy(8000)
+    sleep(10)
     insert('NikosKoukos', 'agorimou', 3000)
     insert('NikosKalantas', 'DiaThalasseos', 5000)
     test_replicas()
@@ -161,6 +164,7 @@ def main():
     print_all_files()
 
     deploy(9000)
+    sleep(10)
     test_replicas()
 
     files = ['asdlkjfpuo', 'alkjhw10912``asld', 'asdf123', '123adzxce', 'asldk']
@@ -171,6 +175,7 @@ def main():
     test_replicas()
 
     depart(8000)
+    sleep(10)
     test_replicas()
 
 if __name__ == '__main__':

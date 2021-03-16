@@ -236,6 +236,10 @@ def increase_replicas_in_range():
 
     replicas_lock.acquire()
 
+    if x >= K-1:
+        replicas_lock.release()
+        return OK
+
     if x <= K-2:
         replicas[K-2] = {}
 
@@ -245,6 +249,8 @@ def increase_replicas_in_range():
         replicas[x] = {}
 
     replicas_lock.release()
+
+    increase_replicas_in_range_request(next, x+1)
 
     return OK
 
@@ -379,9 +385,11 @@ def join():
                 insert_request(new_previous, files[key_hash]['name'], files[key_hash]['value'], propagate = False)
                 files_to_replicas.append(key_hash)
 
+        replicas_exist = False
 
         for k in range(K-1):
             for key_hash in replicas[k]:
+                replicas_exist = True
                 insert_replica_request(requester,
                                        replicas[k][key_hash]['name'],
                                        replicas[k][key_hash]['value'],
@@ -394,7 +402,8 @@ def join():
                 replicas[i] = replicas[i-1]
             replicas[0] = {}
 
-        increase_replicas_in_range_request(next,1)
+        if replicas_exist:
+            increase_replicas_in_range_request(next,1)
 
         for key_hash in files_to_replicas:
             replicas[0][key_hash] = files[key_hash]
