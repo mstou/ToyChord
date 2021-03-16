@@ -23,13 +23,13 @@ def debug(s):
 def print_error(s):
     print(f'\u274c {s}')
 
-def deploy(port):
+def deploy(port, k = K, consistency=consistency):
     print(f'deploying server at port {port}')
     if port not in PORTS:
         PORTS.add(port)
 
     def aux(port):
-        command = f'python3 node.py --port {port} -k {K} --local'.split(' ')
+        command = f'python3 node.py --port {port} -k {k} --local'.split(' ')
         if port == 5000:
             command.append('--bootstrap')
         if consistency == EVENTUAL:
