@@ -16,3 +16,6 @@ PROPAGATE_REPLICAS = 'propagate_replicas'
 
 BAD_REQUEST  = 400
 UNAUTHORIZED = 401
+
+EVENTUAL = 'eventual'
+LINEARIZABILITY = 'linearizability'
