@@ -450,7 +450,7 @@ def insert():
         files_lock.acquire()
         files[key_hash.hexdigest()] = {'name': key_str, 'value': value}
 
-        if propagate:
+        if propagate and K > 1:
             if consistency == EVENTUAL:
                 updates = threading.Thread(
                                 target=insert_replica_request,
@@ -490,13 +490,14 @@ def delete():
         files_lock.acquire()
 
         if key_hash_str in files:
-            if consistency == EVENTUAL:
-                threading.Thread(
-                            target=delete_replica_request,
-                            args=(next, files[key_hash_str]['name'], 0)
-                            ).start()
-            else: # LINEARIZABILITY
-                delete_replica_request(next, files[key_hash_str]['name'], 0)
+            if K > 1:
+                if consistency == EVENTUAL:
+                    threading.Thread(
+                                target=delete_replica_request,
+                                args=(next, files[key_hash_str]['name'], 0)
+                                ).start()
+                else: # LINEARIZABILITY
+                    delete_replica_request(next, files[key_hash_str]['name'], 0)
 
             del files[key_hash_str]
 
@@ -549,7 +550,7 @@ def get_all_files():
     pointers_lock.acquire()
 
     result = {}
-    result['files'] = replicas[K-2]
+    result['files'] = files if K == 1 else replicas[K-2]
     result['next'] = {'port': next.get_port(), 'ip': next.get_ip()}
 
     replicas_lock.release()
@@ -628,7 +629,7 @@ def query():
 
             files_lock.release()
 
-            if consistency == EVENTUAL:
+            if consistency == EVENTUAL or K == 1:
                 result = files[key_hash_str]
 
             else: # LINEARIZABILITY
@@ -641,7 +642,7 @@ def query():
     next_ = next
     pointers_lock.release()
 
-    if consistency == EVENTUAL:
+    if consistency == EVENTUAL and K > 1:
         replicas_lock.acquire()
         for i in range(K-1):
             if key_hash_str in replicas[i]:
@@ -672,11 +673,18 @@ def depart():
 
     decrease_replicas_in_range_request(next, 0)
 
-    for key_hash in replicas[K-2]:
-        insert_replica_request(next,
-                               replicas[K-2][key_hash]['name'],
-                               replicas[K-2][key_hash]['value'],
-                               K-2, propagate = False)
+    if K == 1:
+        for key_hash_str in files:
+            insert_request(next,
+                           files[key_hash_str]['name'],
+                           files[key_hash_str]['value'],
+                           propagate = False)
+    else:
+        for key_hash in replicas[K-2]:
+            insert_replica_request(next,
+                                   replicas[K-2][key_hash]['name'],
+                                   replicas[K-2][key_hash]['value'],
+                                   K-2, propagate = False)
 
     files_lock.release()
     replicas_lock.release()

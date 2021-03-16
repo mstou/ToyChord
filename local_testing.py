@@ -3,11 +3,19 @@
 import subprocess
 import threading
 import requests
+import argparse
 import json
 from time import sleep
+from lib.constants import LINEARIZABILITY, EVENTUAL
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-k", type=int)
+parser.add_argument("--eventual", action="store_true")
+args = parser.parse_args()
 
 PORTS = set()
-K = 5
+K = 3 if args.k == None else args.k
+consistency = EVENTUAL if args.eventual else LINEARIZABILITY
 
 def debug(s):
     print('\033[96m' + s + '\033[0m')
@@ -24,6 +32,8 @@ def deploy(port):
         command = f'python3 node.py --port {port} -k {K} --local'.split(' ')
         if port == 5000:
             command.append('--bootstrap')
+        if consistency == EVENTUAL:
+            command.append('--eventual')
         subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     t = threading.Thread(target=aux, args=(port,))
@@ -134,6 +144,7 @@ def test_replicas():
         print('All replicas are in place' + ' \u2705')
 
 def main():
+    print(f'Initiating test with k = {K} and consistency = {consistency}\n')
     deploy(5000)
     deploy(4000)
     deploy(3000)
