@@ -7,7 +7,7 @@ class Query extends React.Component {
 
     this.state = {
       key: '',
-      node: this.nodes[0],
+      node: '',
       value: ''
     };
 
@@ -28,8 +28,13 @@ class Query extends React.Component {
   }
 
   handleSubmit(event) {
-    console.log(this.state.key);
     // query request to server...
+    const url = `http://${this.state.node}/query?key=${this.state.key}`;
+    console.log(url);
+    fetch(url)
+    .then(res => res.json())
+    .then(data => console.log(data));
+
     const val = 'this is a test';
     this.setState({
       value: val
@@ -38,6 +43,7 @@ class Query extends React.Component {
   }
 
   render() {
+    const nodes = this.props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
     return (
       <div className='p-3'>
         <h2>Query</h2>
@@ -50,7 +56,7 @@ class Query extends React.Component {
             <label>Node</label>
             <br/>
             <select value={this.state.node} onChange={this.onNodeChange}>
-              {this.nodes.map(node => (
+              {nodes.map(node => (
                 <option key={node} value={node}>
                   {node}
                 </option>

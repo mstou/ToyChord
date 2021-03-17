@@ -3,9 +3,7 @@ import React from 'react';
 class Depart extends React.Component {
   constructor(props) {
     super(props);
-    this.nodes = props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
-    this.state = {selectedNode: this.nodes[0] || null };
-    
+    this.state = {selectedNode: ''};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -22,15 +20,16 @@ class Depart extends React.Component {
   }
 
   render() {
-    return this.state.selectedNode ?
-      (<div className='p-3'>
+    const nodes = this.props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
+    return (
+      <div className='p-3'>
         <h2>Depart</h2>
         <form onSubmit={this.handleSubmit}>
           <div className='form-group'>
             <label>Select node</label>
             <br/>
             <select value={this.state.value} onChange={this.handleChange}>
-            {this.nodes.map(node => (
+            {nodes.map(node => (
               <option key={node} value={node}>
                 {node}
               </option>
@@ -39,11 +38,8 @@ class Depart extends React.Component {
           </div>
           <input className='btn btn-primary' type="submit" value="Depart" />
         </form>
-      </div>)
-      :
-      <p>No nodes in ToyChord...</p>
-
-  }
+      </div>
+    )}
 }
 
 export default Depart;

@@ -3,11 +3,9 @@ import React from 'react';
 class Delete extends React.Component {
   constructor(props) {
     super(props);
-    this.nodes = props.nodes.map(n => `${n.me.ip}:${n.me.port}`)
-
     this.state = {
       key: '',
-      node: this.nodes[0]
+      node: ''
     };
 
     this.onKeyChange = this.onKeyChange.bind(this);
@@ -30,6 +28,7 @@ class Delete extends React.Component {
   }
 
   render() {
+    const nodes = this.props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
     return (
       <div className='p-3'>
         <h2>Delete</h2>
@@ -42,7 +41,7 @@ class Delete extends React.Component {
             <label>Node</label>
             <br/>
             <select value={this.state.node} onChange={this.onNodeChange}>
-              {this.nodes.map(node => (
+              {nodes.map(node => (
                 <option key={node} value={node}>
                   {node}
                 </option>

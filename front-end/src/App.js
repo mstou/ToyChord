@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
 import { Depart, Insert, Query, Log, Delete, Topology, PieChart } from './components';
-import nodes from './input.js';
+// import nodes from './input.js';
 
 const LeftHalf = ({nodes}) => (
   <>
@@ -40,15 +40,56 @@ const RightHalf = ({nodes, handleReload}) => (
   </>
 );
 
+const fetchNodes = async () => {
+  const bootstrap = '127.0.0.1:5000'
+  let next = bootstrap; // start from bootstrap node
+  const nodes = [];
+
+  let cnt = 0; // safety counter
+  while (true) {
+    const url = `http://${next}/log`;
+    const res = await fetch(url);
+    const node = await res.json();
+    nodes.push(node);
+
+    next = `${node.next.ip}:${node.next.port}`;
+    if (next === bootstrap || !nodes) {
+      break;
+    }
+
+    cnt += 1;
+    if (cnt > 20) {
+      console.log("Too many nodes to handle...");
+      break;
+    }
+  }
+  return nodes;
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
-
+    this.state = {
+      nodes: []
+    }
     this.handleReload = this.handleReload.bind(this);
   }
 
-  handleReload(event) {
-    alert("reload")
+  async componentDidMount() {
+    const nodes = await fetchNodes();
+    this.setState({
+      nodes: nodes
+    });
+    console.log(nodes);
+  }
+
+  async handleReload(event) {
+    const nodes = await fetchNodes();
+    this.setState({
+      nodes: nodes
+    });
+
+    console.log(nodes);
   }
 
   render() {
@@ -58,10 +99,10 @@ class App extends React.Component {
         <div className='p-4'>
           <div className='row'>
             <div className='col'>
-              <RightHalf nodes={nodes} handleReload={this.handleReload}/>
+              <RightHalf nodes={this.state.nodes} handleReload={this.handleReload}/>
             </div>
             <div className='col'>
-              <LeftHalf nodes={nodes}/>
+              <LeftHalf nodes={this.state.nodes}/>
             </div>
           </div>
         </div>
@@ -69,19 +110,5 @@ class App extends React.Component {
     );
   }
 }
-
-// function App() {
-//     return (
-//       <div>
-//         <Delete nodes={nodes} />
-//         <Depart nodes={nodes} />
-//         <Insert nodes={nodes} />
-//         <Log nodes={nodes} />
-//         <Query nodes={nodes} />
-//         <PieChart nodes={nodes} />
-//         <Topology nodes={nodes} />
-//       </div>
-//     )
-// }
 
 export default App;

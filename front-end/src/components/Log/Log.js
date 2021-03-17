@@ -4,10 +4,9 @@ import Node from './LogNode';
 class Log extends React.Component {
   constructor(props) {
     super(props);
-    this.nodes = props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
-
+    
     this.state = {
-      selectedNode: this.nodes[0] || null,
+      selectedNode: '',
       index: 0,
       log: false,
     }
@@ -43,15 +42,16 @@ class Log extends React.Component {
   }
 
   render() {
-    return this.state.selectedNode ?
-      (<div className='p-3'>
+    const nodes = this.props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
+    return (
+      <div className='p-3'>
         <h2>Log</h2>
         <form onSubmit={this.handleSubmit}>
           <div className='form-group'>
             <label>Select node</label>
             <br/>
             <select value={this.state.selectedNode} onChange={this.handleChange}>
-            {this.nodes.map((node, index) => (
+            {nodes.map((node, index) => (
               <option key={node} value={node}>
                 {node}
               </option>
@@ -74,11 +74,8 @@ class Log extends React.Component {
           <p> </p>
 
         }
-      </div>)
-      :
-      <p>No nodes in ToyChord...</p>
-
-  }
+      </div>
+    )}
 }
 
 export default Log;
