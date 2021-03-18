@@ -1,6 +1,6 @@
 from time import time
 import sys
-from random import randrange, choice
+from random import choice
 from local_testing import *
 from lib.constants import *
 
@@ -30,33 +30,29 @@ def test3():
 
 def test12():    
     print('Deploying 10 servers.')
-
     for p in ports:
         deploy(p, K, consistency)
-
     print('Deployments OK')
     sleep(10)
     print_graph()
 
-    f = open('transactions/insert.txt', 'r').read().split('\n')[:-1]
+    with open('./transactions/insert.txt', 'r') as f:
+        lines = f.readlines()
+        start = time()
+        for line in lines:
+            _, key, value = line.split(', ')
+            insert(key, value, choice(ports))
+        end = time()
+        print(f'Insertions took {end-start} seconds')
 
-    insertions = list(map(lambda x: x.split(', '), f))
-
-    print(f'Doing {len(insertions)} insert requests..')
-
-    start = time()
-
-    for q in insertions:
-        name  = q[0]
-        value = q[1]
-
-        target_port = ports[randrange(0,len(ports))]
-        insert(name, value, target_port)
-
-    end = time()
-    print(f'Insertions took {end-start} seconds')
-    test_replicas()
-
+    with open('./transactions/query.txt', 'r') as f:
+        lines = f.readlines()
+        start = time()
+        for line in lines:
+            _, key = line.split(', ')
+            query(key, choice(ports))
+        end = time()
+        print(f'Queries took {end-start} seconds')
 
 if __name__ == '__main__':
     test12()
