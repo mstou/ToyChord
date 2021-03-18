@@ -40,7 +40,7 @@ def test12():
         lines = f.readlines()
         start = time()
         for line in lines:
-            _, key, value = line.split(', ')
+            key, value = line.split(', ')
             insert(key, value, choice(ports))
         end = time()
         print(f'Insertions took {end-start} seconds')
@@ -49,7 +49,7 @@ def test12():
         lines = f.readlines()
         start = time()
         for line in lines:
-            _, key = line.split(', ')
+            key = line
             query(key, choice(ports))
         end = time()
         print(f'Queries took {end-start} seconds')
