@@ -1,6 +1,6 @@
-import argparse
 from time import time
-from random import randrange
+import sys
+from random import randrange, choice
 from local_testing import *
 from lib.constants import *
 
@@ -8,32 +8,56 @@ K = 5
 consistency = LINEARIZABILITY
 ports = [5000, 3000, 3030, 5050, 5051, 5055, 8000, 8080, 8081, 9000]
 
-print('Deploying 10 servers.')
+def test3():
+    print('Deploying 10 servers.')
+    for p in ports:
+        deploy(p, K, consistency)
+    print('Deployments OK')
+    sleep(10)
+    print_graph()
+    start = time()
+    with open('./transactions/requests.txt') as f:
+        for line in f.readlines():
+            if line.startswith('insert'):
+                _, key, value = line.split(', ')
+                insert(key, value, choice(ports))
+            elif line.startswith('query'):
+                _, key = line.split(', ')
+                query(key, choice(ports))
+    test_replicas()
+    print(f'Requests took {time()-start} seconds')
+    
 
-for p in ports:
-    deploy(p, K, consistency)
+def test12():    
+    print('Deploying 10 servers.')
 
-print('Deployments OK')
-sleep(10)
-print_graph()
+    for p in ports:
+        deploy(p, K, consistency)
 
-f = open('transactions/insert.txt', 'r').read().split('\n')[:-1]
+    print('Deployments OK')
+    sleep(10)
+    print_graph()
 
-insertions = list(map(lambda x: x.split(', '), f))
+    f = open('transactions/insert.txt', 'r').read().split('\n')[:-1]
 
-print(f'Doing {len(insertions)} insert requests..')
+    insertions = list(map(lambda x: x.split(', '), f))
 
-start = time()
+    print(f'Doing {len(insertions)} insert requests..')
 
-for q in insertions:
-    name  = q[0]
-    value = q[1]
+    start = time()
 
-    target_port = ports[randrange(0,len(ports))]
-    insert(name, value, target_port)
+    for q in insertions:
+        name  = q[0]
+        value = q[1]
 
-end = time()
+        target_port = ports[randrange(0,len(ports))]
+        insert(name, value, target_port)
 
-print(f'Insertions took {end-start} seconds')
+    end = time()
+    print(f'Insertions took {end-start} seconds')
+    test_replicas()
 
-test_replicas()
+
+if __name__ == '__main__':
+    test12()
+    # test3()
