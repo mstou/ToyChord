@@ -1,6 +1,7 @@
 import './App.css';
 import React from 'react';
 import { Depart, Insert, Query, Log, Delete, Topology, PieChart } from './components';
+import { base_url } from './components/constants';
 // import nodes from './input.js';
 
 const LeftHalf = ({nodes}) => (
@@ -41,7 +42,7 @@ const RightHalf = ({nodes, handleReload}) => (
 );
 
 const fetchNodes = async () => {
-  const bootstrap = '127.0.0.1:5000'
+  const bootstrap = base_url;
   let next = bootstrap; // start from bootstrap node
   const nodes = [];
 
@@ -58,7 +59,7 @@ const fetchNodes = async () => {
     }
 
     cnt += 1;
-    if (cnt > 20) {
+    if (cnt > 10) {
       console.log("Too many nodes to handle...");
       break;
     }

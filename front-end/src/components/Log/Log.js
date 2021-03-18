@@ -1,12 +1,13 @@
 import React from 'react';
 import Node from './LogNode';
+import { base_url } from '../constants';
 
 class Log extends React.Component {
   constructor(props) {
     super(props);
-    
+
     this.state = {
-      selectedNode: '',
+      selectedNode: base_url,
       index: 0,
       log: false,
     }

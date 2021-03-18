@@ -6,7 +6,7 @@ class Insert extends React.Component {
     this.state = {
       key: '',
       value: '',
-      node: ''
+      node: '127.0.0.1:5000'
     };
 
     this.onKeyChange = this.onKeyChange.bind(this);
@@ -28,8 +28,11 @@ class Insert extends React.Component {
   }
 
   handleSubmit(event) {
-    console.log(this.state);
-    alert('Inserting key, value...');
+    const url = `http://${this.state.node}/insert?key=${this.state.key}&value=${this.state.value}`;
+    console.log(url);
+    fetch(url)
+    .then(res => console.log(res))
+    .catch(exc => console.log(exc))
     event.preventDefault();
   }
 

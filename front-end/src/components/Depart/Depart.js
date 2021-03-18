@@ -1,9 +1,10 @@
 import React from 'react';
+import { base_url } from '../constants';
 
 class Depart extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {selectedNode: ''};
+    this.state = {selectedNode: base_url};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -14,8 +15,16 @@ class Depart extends React.Component {
   }
 
   handleSubmit(event) {
-    console.log(this.state.selectedNode)
-    alert(`Node departed: ${this.state.selectedNode}`);
+    const url = `http://${this.state.selectedNode}/depart`;
+    if (this.state.selectedNode !== base_url) {
+      fetch(url)
+      .then(res => console.log(res))
+      .catch(exc => console.log(exc))
+    }
+    else {
+      console.log('Cannot depart bootstrap node.');
+    }
+
     event.preventDefault();
   }
 
