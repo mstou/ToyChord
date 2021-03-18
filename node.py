@@ -637,6 +637,7 @@ def query():
 
             return jsonify(result)
 
+        files_lock.release()
         return jsonify({})
 
     next_ = next
