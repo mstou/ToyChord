@@ -1,4 +1,5 @@
 import React from 'react';
+import { base_url } from '../constants';
 
 class Query extends React.Component {
   constructor(props) {
@@ -7,7 +8,7 @@ class Query extends React.Component {
 
     this.state = {
       key: '',
-      node: '',
+      node: base_url,
       value: ''
     };
 

@@ -1,11 +1,12 @@
 import React from 'react';
+import { base_url } from '../constants';
 
 class Delete extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       key: '',
-      node: ''
+      node: base_url
     };
 
     this.onKeyChange = this.onKeyChange.bind(this);
@@ -22,8 +23,11 @@ class Delete extends React.Component {
   }
 
   handleSubmit(event) {
-    console.log(this.state);
-    alert('Delete key, node...');
+    const url = `http://${this.state.node}/query?key=${this.state.key}`;
+    fetch(url)
+    .then(res => console.log(res))
+    .catch(exc => console.log(exc))
+
     event.preventDefault();
   }
 
