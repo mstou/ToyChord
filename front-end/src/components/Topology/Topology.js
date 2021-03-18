@@ -19,7 +19,7 @@ function Topology(props) {
     }
 
     const draw = p5 => {
-
+      p5.background('white');
       // draw network circle of radius R
       p5.circle(centerX, centerY, D);
 

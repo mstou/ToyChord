@@ -24,22 +24,22 @@ class Query extends React.Component {
   onNodeChange(event) {
     this.setState({
       node: event.target.value,
-      value: ''
+      value: '',
+
     });
   }
 
   handleSubmit(event) {
-    // query request to server...
     const url = `http://${this.state.node}/query?key=${this.state.key}`;
-    console.log(url);
+
     fetch(url)
     .then(res => res.json())
-    .then(data => console.log(data));
+    .then(data => (
+      this.setState({
+        value: data.value
+      })))
+    .catch(exc => console.log(exc))
 
-    const val = 'this is a test';
-    this.setState({
-      value: val
-    });
     event.preventDefault();
   }
 
@@ -71,7 +71,7 @@ class Query extends React.Component {
           ?
           <p className='mt-3'> Value: {this.state.value} </p>
           :
-          <p> Key not found </p>
+          <p>  </p>
         }
       </div>
     );

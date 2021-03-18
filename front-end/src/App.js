@@ -2,7 +2,6 @@ import './App.css';
 import React from 'react';
 import { Depart, Insert, Query, Log, Delete, Topology, PieChart } from './components';
 import { base_url } from './components/constants';
-// import nodes from './input.js';
 
 const LeftHalf = ({nodes}) => (
   <>
@@ -95,7 +94,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className='app container-fluid w-100 d-inline-block light-gray'>
+      <div className='app container-fluid w-100 d-inline-block'>
         <h1 className='text-center mt-4 p-3'>ToyChord</h1>
         <div className='p-4'>
           <div className='row'>
