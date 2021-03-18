@@ -55,7 +55,7 @@ def query_request(targetNode, key):
     return result
 
 def query_replica_request(targetNode, key, number):
-    url = HTTP + targetNode.get_address() + '/query'
+    url = HTTP + targetNode.get_address() + '/query_replica'
     params = f'{KEY}={key}&{NUMBER}={number}'
     result = requests.get(url + '?' + params)
     return result

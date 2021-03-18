@@ -575,11 +575,12 @@ def query_replica():
     key_hash_str  = key_hash.hexdigest()
     number = int(request.args.get(NUMBER))
 
-    if number < K-2:
+    print(f'{me} just got a replica query')
+    if number < K-1:
         result = query_replica_request(next, key_str, number+1)
         return result.json()
 
-    if number == K-2:
+    if number == K-1:
         replicas_lock.acquire()
         file = replicas[K-2][key_hash_str]
         replicas_lock.release()
@@ -627,13 +628,14 @@ def query():
 
         if key_hash_str in files:
 
-            files_lock.release()
-
             if consistency == EVENTUAL or K == 1:
                 result = files[key_hash_str]
+                files_lock.release()
 
             else: # LINEARIZABILITY
-                result = query_replica_request(next, key_str, 1)
+                files_lock.release()
+                print(f'{me} querying replica')
+                result = query_replica_request(next, key_str, 1).json()
 
             return jsonify(result)
 
