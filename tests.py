@@ -1,5 +1,5 @@
-from time import time
 import sys
+from time import time
 from random import randrange, choice
 from local_testing import *
 from lib.constants import *
@@ -26,9 +26,9 @@ def test3():
                 query(key, choice(ports))
     test_replicas()
     print(f'Requests took {time()-start} seconds')
-    
 
-def test12():    
+
+def test12():
     print('Deploying 10 servers.')
 
     for p in ports:
