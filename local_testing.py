@@ -63,7 +63,7 @@ def log(port, verbose=True):
         print(pretty(response))
     return response.json()
 
-def insert(key, value, port):
+def insert(key, value, port=5000):
     print(f'inserting at node {port}: {key} -> {value}...', end=' ')
     response = requests.get(f'http://localhost:{port}/insert?key={key}&value={value}')
     if response.status_code == 200:
