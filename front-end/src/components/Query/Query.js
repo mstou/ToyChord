@@ -31,14 +31,27 @@ class Query extends React.Component {
 
   handleSubmit(event) {
     const url = `http://${this.state.node}/query?key=${this.state.key}`;
-
-    fetch(url)
-    .then(res => res.json())
-    .then(data => (
-      this.setState({
-        value: data.value
-      })))
-    .catch(exc => console.log(exc))
+    console.log(url)
+    if (this.state.key === '*') {
+      fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+        this.setState({
+          value: data.value
+        })})
+      .catch(exc => console.log(exc))
+    }
+    else {
+      fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+        this.setState({
+          value: data.value
+        })})
+      .catch(exc => console.log(exc))
+    }
 
     event.preventDefault();
   }

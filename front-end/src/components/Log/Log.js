@@ -21,7 +21,7 @@ class Log extends React.Component {
     const node = event.target.value;
     const [ip, port] = node.split(':');
     const index = this.props.nodes.findIndex(n => (
-      n.me.ip === ip && n.me.port === port
+      n.me.ip === ip && n.me.port === parseInt(port)
     ));
 
     this.setState({
@@ -35,7 +35,6 @@ class Log extends React.Component {
   }
 
   handleSubmit(event) {
-    console.log(this.state.selectedNode)
     this.setState({
       log: true
     })
