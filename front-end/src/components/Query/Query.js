@@ -9,12 +9,15 @@ class Query extends React.Component {
     this.state = {
       key: '',
       node: base_url,
-      value: ''
+      value: '',
+      printAll: false,
+      files: []
     };
 
     this.onKeyChange = this.onKeyChange.bind(this);
     this.onNodeChange = this.onNodeChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleClear = this.handleClear.bind(this);
   }
 
   onKeyChange(event) {
@@ -25,20 +28,36 @@ class Query extends React.Component {
     this.setState({
       node: event.target.value,
       value: '',
-
+      files: [],
+      printAll: false
     });
+  }
+
+  handleClear(event) {
+      this.setState({
+        value: '',
+        printAll: false,
+        files: []
+      })
   }
 
   handleSubmit(event) {
     const url = `http://${this.state.node}/query?key=${this.state.key}`;
-    console.log(url)
     if (this.state.key === '*') {
       fetch(url)
       .then(res => res.json())
       .then(data => {
-        console.log(data);
+        const nodes = data.map(n => n.files);
+        const files = nodes.map(n => {
+          const vals = Object.values(n)
+          return vals;
+        })
+
+        console.log(files);
         this.setState({
-          value: data.value
+          value: '',
+          files: files,
+          printAll: true
         })})
       .catch(exc => console.log(exc))
     }
@@ -46,9 +65,10 @@ class Query extends React.Component {
       fetch(url)
       .then(res => res.json())
       .then(data => {
-        console.log(data);
         this.setState({
-          value: data.value
+          value: data.value,
+          printAll: false,
+          files: []
         })})
       .catch(exc => console.log(exc))
     }
@@ -58,6 +78,7 @@ class Query extends React.Component {
 
   render() {
     const nodes = this.props.nodes.map(n => `${n.me.ip}:${n.me.port}`);
+
     return (
       <div className='p-3'>
         <h2>Query</h2>
@@ -85,6 +106,34 @@ class Query extends React.Component {
           <p className='mt-3'> Value: {this.state.value} </p>
           :
           <p>  </p>
+        }
+        {
+          this.state.printAll
+          ?
+          <div>
+            {this.state.files.map((file, ind) => (
+              <div key={ind}>
+                <p> <b>Node {ind}</b> </p>
+                {
+                  file.length
+                  ?
+                  file.map(f =>
+                    <p key={f.name}>
+                      Key: {f.name}<br/>
+                      Value: {f.value}
+                    </p>
+                  )
+                  :
+                  <p> No files </p>
+                }
+              </div>
+            ))}
+            <button className="btn btn-primary" onClick={this.handleClear}>
+              Clear
+            </button>
+            </div>
+          :
+          <p> </p>
         }
       </div>
     );

@@ -80,7 +80,6 @@ class App extends React.Component {
     this.setState({
       nodes: nodes
     });
-    console.log(nodes);
   }
 
   async handleReload(event) {
@@ -88,8 +87,6 @@ class App extends React.Component {
     this.setState({
       nodes: nodes
     });
-
-    console.log(nodes);
   }
 
   render() {
