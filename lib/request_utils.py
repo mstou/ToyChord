@@ -2,6 +2,10 @@ import requests
 from time import sleep
 from lib.constants import *
 
+def log_request(targetNode):
+    url = HTTP + targetNode.get_address() + '/log'
+    return requests.get(url)
+
 def join_request(targetNode, port, ip):
     sleep(2)
     url = HTTP + targetNode.get_address() + '/join'

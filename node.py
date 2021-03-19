@@ -604,20 +604,31 @@ def query():
 
     if key_str == '*':
         # Gather all files from all nodes
+        files_lock.acquire()
+        replicas_lock.acquire()
+        pointers_lock.acquire()
+
         next_to_query = next
-        all_files = {}
+        my_files = {
+                'me': me.json(),
+                'previous': previous.json(),
+                'next': next.json(),
+                'files': files,
+                'replicas': replicas
+                }
+
+        files_lock.release()
+        replicas_lock.release()
+        pointers_lock.release()
+        all_files = [my_files]
 
         while next_to_query != me:
-            response = get_all_files_request(next_to_query).json()
+            response = log_request(next_to_query).json()
             next_to_query = Node(response['next']['ip'], response['next']['port'])
 
-            all_files = {**all_files, **response['files']}
+            all_files.append(response)
 
-        replicas_lock.acquire()
-        all_files = {**all_files, **replicas[K-2]}
-        replicas_lock.release()
-
-        return jsonify(list(all_files.values()))
+        return jsonify(all_files)
 
     pointers_lock.acquire()
 
