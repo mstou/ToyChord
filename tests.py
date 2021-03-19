@@ -1,12 +1,21 @@
 import sys
-from random import choice
+import argparse
 from time import time
+from random import choice
 from local_testing import *
 from lib.constants import *
 
-K = 5
-consistency = LINEARIZABILITY
+parser = argparse.ArgumentParser()
+parser.add_argument("-k", type=int)
+parser.add_argument("--eventual", action="store_true")
+args = parser.parse_args()
+
+K = 3 if args.k == None else args.k
+consistency = EVENTUAL if args.eventual else LINEARIZABILITY
+
 ports = [5000, 3000, 3030, 5050, 5051, 5055, 8000, 8080, 8081, 9000]
+
+output_file = open(f'{K}_{consistency}_{time()}', 'w')
 
 def test3():
     print('Deploying 10 servers.')
@@ -25,8 +34,10 @@ def test3():
                 _, key = line.split(', ')
                 query(key, choice(ports))
     test_replicas()
-    print(f'Requests took {time()-start} seconds')
+    operations_time = time()-start
+    print(f'Requests took {operations_time} seconds')
 
+    print(f'{operations_time}', file = output_file)
 
 def test12():
     print('Deploying 10 servers.')
@@ -43,16 +54,22 @@ def test12():
             key, value = line.split(', ')
             insert(key, value, choice(ports))
         end = time()
-        print(f'Insertions took {end-start} seconds')
+        insertions_time = end-start
+        print(f'Insertions took {insertions_time} seconds')
 
     with open('./transactions/query.txt', 'r') as f:
         lines = f.readlines()
         start = time()
         for line in lines:
-            key = line
+            key = line.split('\n')[0]
             query(key, choice(ports))
         end = time()
-        print(f'Queries took {end-start} seconds')
+        queries_time = end-start
+        print(f'Queries took {queries_time} seconds')
+
+
+    print(f'Insertions: {insertions_time}\nQueries: {queries_time}', file = output_file)
+
 
 if __name__ == '__main__':
     test12()
