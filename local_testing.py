@@ -1,15 +1,18 @@
 #!/usr/bin/python3
 
+import os
+import json
+import signal
 import subprocess
 import threading
 import requests
 import argparse
-import json
 from time import sleep
 from lib.constants import LINEARIZABILITY, EVENTUAL
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-k", type=int)
+parser.add_argument("--all", action="store_true")
 parser.add_argument("--eventual", action="store_true")
 args = parser.parse_args()
 
@@ -17,27 +20,40 @@ PORTS = set()
 K = 3 if args.k == None else args.k
 consistency = EVENTUAL if args.eventual else LINEARIZABILITY
 
+server_processes = []
+
+def kill_servers():
+    for p in server_processes:
+        p.terminate()
+
 def debug(s):
     print('\033[96m' + s + '\033[0m')
 
 def print_error(s):
     print(f'\u274c {s}')
 
-def deploy(port, k = K, consistency=consistency):
+
+def deploy(port, k = K, consistency=consistency, killable = False):
+    global server_processes
     print(f'deploying server at port {port}')
     if port not in PORTS:
         PORTS.add(port)
 
-    def aux(port):
-        command = f'python3 node.py --port {port} -k {k} --local'.split(' ')
-        if port == 5000:
-            command.append('--bootstrap')
-        if consistency == EVENTUAL:
-            command.append('--eventual')
-        subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    command = f'python3 node.py --port {port} -k {k} --local'.split(' ')
+    if port == 5000:
+        command.append('--bootstrap')
+    if consistency == EVENTUAL:
+        command.append('--eventual')
 
-    t = threading.Thread(target=aux, args=(port,))
-    t.start()
+    def aux(command):
+        p = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    if killable:
+        p = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        server_processes.append(p)
+    else:
+        t = threading.Thread(target=aux, args=(command,))
+        t.start()
     sleep(10)
 
 def depart(port):
@@ -145,11 +161,11 @@ def test_replicas():
 
 def main():
     print(f'Initiating test with k = {K} and consistency = {consistency}\n')
-    deploy(5000)
-    deploy(4000)
-    deploy(3000)
-    deploy(5050)
-    deploy(8080)
+    deploy(5000, killable = True)
+    deploy(4000, killable = True)
+    deploy(3000, killable = True)
+    deploy(5050, killable = True)
+    deploy(8080, killable = True)
     # servers are deployed at this point
     print_graph()
     sleep(1)

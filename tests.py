@@ -1,26 +1,33 @@
 import sys
 import argparse
+from tqdm import tqdm
 from time import time
 from random import choice
 from local_testing import *
 from lib.constants import *
+from itertools import product
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-k", type=int)
+parser.add_argument("--all", action="store_true")
 parser.add_argument("--eventual", action="store_true")
 args = parser.parse_args()
 
+print(args)
+
 K = 3 if args.k == None else args.k
 consistency = EVENTUAL if args.eventual else LINEARIZABILITY
+run_all = args.all
 
 ports = [5000, 3000, 3030, 5050, 5051, 5055, 8000, 8080, 8081, 9000]
 
-output_file = open(f'{K}_{consistency}_{time()}', 'w')
+all_consistencies = [EVENTUAL, LINEARIZABILITY]
+all_k = list(range(1,11))
 
 def test3():
     print('Deploying 10 servers.')
     for p in ports:
-        deploy(p, K, consistency)
+        deploy(p, K, consistency, killable = True)
     print('Deployments OK')
     sleep(10)
     print_graph()
@@ -39,10 +46,12 @@ def test3():
 
     print(f'{operations_time}', file = output_file)
 
-def test12():
+def test12(k, consistency_):
+    print(f'Running experiment with k = {k} and consistency {consistency_}')
+    output_file = open(f'test_results/{k}_{consistency_}_{time()}', 'w')
     print('Deploying 10 servers.')
     for p in ports:
-        deploy(p, K, consistency)
+        deploy(p, k, consistency_, killable = True)
     print('Deployments OK')
     sleep(10)
     print_graph()
@@ -72,5 +81,14 @@ def test12():
 
 
 if __name__ == '__main__':
-    test12()
-    # test3()
+    if run_all:
+        all_configurations = product(all_consistencies, all_k, list(range(5)))
+
+        for consistency_, k, _ in tqdm(all_configurations):
+            print()
+            test12(k, consistency_)
+            kill_servers()
+            sleep(5)
+            # test3()
+    else:
+        test12()
