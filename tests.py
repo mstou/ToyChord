@@ -24,16 +24,16 @@ ports = [5000, 3000, 3030, 5050, 5051, 5055, 8000, 8080, 8081, 9000]
 all_consistencies = [EVENTUAL, LINEARIZABILITY]
 all_k = list(range(1,11))
 
-def test3():
+def test3(k, consistency_):
     print('Deploying 10 servers.')
     for p in ports:
-        deploy(p, K, consistency, killable = True)
+        deploy(p, k, consistency_, killable = True)
     print('Deployments OK')
     sleep(10)
     print_graph()
-
-def test3():
-    deploy_servers()
+    output_file = open(f'test_results/3/{k}_{consistency_}', 'w')
+    hashtable = {}
+    stale_reads = 0
     with open('./transactions/requests.txt') as f:
         lines = list(map(lambda x: x.strip('\n'), f.readlines()))
         request_times = []
@@ -43,16 +43,25 @@ def test3():
                 request_start = time()
                 insert(key, value, choice(ports))
                 request_times.append(time() - request_start)
+                hashtable[key] = value # update hashtable
             elif line.startswith('query'):
                 _, key = line.split(', ')
                 request_start = time()
-                query(key, choice(ports))
+                response = query(key, choice(ports))
                 request_times.append(time() - request_start)
+                if key not in hashtable:
+                    pass
+                else:
+                    value = hashtable[key]
+                    read = 'nothing' if 'value' not in response else response['value']
+                    if value != read:
+                        print(f"\u274c stale read for key {key}. Expected {value}, got {read}")
+                        stale_reads += 1
     test_replicas()
-    operations_time = time()-start
-    print(f'Requests took {operations_time} seconds')
-
-    print(f'{operations_time}', file = output_file)
+    print(f'Requests took {sum(request_times)} seconds')
+    print(f'{sum(request_times)}', file = output_file)
+    print(f'Stale reads: {stale_reads}')
+    print(f'Stale reads: {stale_reads}', file=output_file)
 
 def test12(k, consistency_):
     print(f'Running experiment with k = {k} and consistency {consistency_}')
@@ -63,9 +72,6 @@ def test12(k, consistency_):
     print('Deployments OK')
     sleep(10)
     print_graph()
-
-def test12(K, consistency):
-    deploy_servers()
     with open('./transactions/insert.txt', 'r') as f:
         # do all inserts and update log files
         lines = list(map(lambda line: line.strip('\n'), f.readlines()))
@@ -83,7 +89,7 @@ def test12(K, consistency):
         lines = list(map(lambda line: line.strip('\n'), f.readlines()))
         for line in lines:
             key = line.split('\n')[0]
-            quey_start = time()
+            query_start = time()
             query(key, choice(ports))
             query_times.append(time() - query_start)
         print(f'Queries took {sum(query_times)} seconds')
@@ -91,13 +97,13 @@ def test12(K, consistency):
 
 if __name__ == '__main__':
     if run_all:
-        all_configurations = product(all_consistencies, all_k, list(range(5)))
+        all_configurations = product(all_consistencies, all_k, list(range(1)))
 
         for consistency_, k, _ in tqdm(all_configurations):
             print()
-            test12(k, consistency_)
+            # test12(k, consistency_)
+            test3(k, consistency_)
             kill_servers()
             sleep(5)
-            # test3()
     else:
         test12()
