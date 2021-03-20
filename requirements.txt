@@ -15,6 +15,6 @@ pyparsing==2.4.7
 pytest==6.2.2
 requests==2.25.1
 toml==0.10.2
+tqdm==4.59.0
 urllib3==1.26.3
 Werkzeug==1.0.1
-argparse
