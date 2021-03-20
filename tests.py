@@ -15,60 +15,56 @@ consistency = EVENTUAL if args.eventual else LINEARIZABILITY
 
 ports = [5000, 3000, 3030, 5050, 5051, 5055, 8000, 8080, 8081, 9000]
 
-output_file = open(f'{K}_{consistency}_{time()}', 'w')
+def deploy_servers():
+    print('Deploying 10 servers.')
+    for p in ports:
+        deploy(p, K, consistency)
+    print('Deployments OK')
+    sleep(10)
+    print_graph()
 
 def test3():
-    print('Deploying 10 servers.')
-    for p in ports:
-        deploy(p, K, consistency)
-    print('Deployments OK')
-    sleep(10)
-    print_graph()
-    start = time()
+    deploy_servers()
     with open('./transactions/requests.txt') as f:
-        for line in f.readlines():
+        lines = list(map(lambda x: x.strip('\n'), f.readlines()))
+        request_times = []
+        for line in lines:
             if line.startswith('insert'):
                 _, key, value = line.split(', ')
+                request_start = time()
                 insert(key, value, choice(ports))
+                request_times.append(time() - request_start)
             elif line.startswith('query'):
                 _, key = line.split(', ')
+                request_start = time()
                 query(key, choice(ports))
+                request_times.append(time() - request_start)
     test_replicas()
-    operations_time = time()-start
-    print(f'Requests took {operations_time} seconds')
+    print(f'Requests took {sum(request_times)} seconds')
 
-    print(f'{operations_time}', file = output_file)
-
-def test12():
-    print('Deploying 10 servers.')
-    for p in ports:
-        deploy(p, K, consistency)
-    print('Deployments OK')
-    sleep(10)
-    print_graph()
-
+def test12(K, consistency):
+    deploy_servers()
     with open('./transactions/insert.txt', 'r') as f:
-        lines = f.readlines()
-        start = time()
+        # do all inserts and update log files
+        lines = list(map(lambda line: line.strip('\n'), f.readlines()))
+        insert_times = []
         for line in lines:
             key, value = line.split(', ')
+            insert_start = time()
             insert(key, value, choice(ports))
-        end = time()
-        insertions_time = end-start
-        print(f'Insertions took {insertions_time} seconds')
+            insert_end = time()
+            insert_times.append(insert_end - insert_start)
+        print(f'Insertions took {sum(insert_times)} seconds')
 
     with open('./transactions/query.txt', 'r') as f:
-        lines = f.readlines()
-        start = time()
+        query_times = []
+        lines = list(map(lambda line: line.strip('\n'), f.readlines()))
         for line in lines:
             key = line.split('\n')[0]
+            quey_start = time()
             query(key, choice(ports))
-        end = time()
-        queries_time = end-start
-        print(f'Queries took {queries_time} seconds')
-
-
-    print(f'Insertions: {insertions_time}\nQueries: {queries_time}', file = output_file)
+            query_times.append(time() - query_start)
+        print(f'Queries took {sum(query_times)} seconds')
 
 
 if __name__ == '__main__':
