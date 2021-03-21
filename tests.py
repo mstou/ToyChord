@@ -31,7 +31,7 @@ def test3(k, consistency_):
     print('Deployments OK')
     sleep(10)
     print_graph()
-    output_file = open(f'test_results/3/{k}_{consistency_}', 'w')
+    output_file = open(f'test_results/3/{k}_{consistency_}_{time()}', 'w')
     hashtable = {}
     stale_reads = 0
     with open('./transactions/requests.txt') as f:
@@ -97,7 +97,7 @@ def test12(k, consistency_):
 
 if __name__ == '__main__':
     if run_all:
-        all_configurations = product(all_consistencies, all_k, list(range(1)))
+        all_configurations = product(all_consistencies, all_k, list(range(5)))
 
         for consistency_, k, _ in tqdm(all_configurations):
             print()
