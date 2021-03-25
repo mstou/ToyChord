@@ -48,3 +48,11 @@ python local_testing.py
  pytest
  ```
  in the root directory.
+
+ ## Front end deployment to heroku (for the owner of the Heroku app)
+
+You need to run 
+```
+git subtree push --prefix front-end heroku main
+```
+in project root level.

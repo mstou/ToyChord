@@ -5,3 +5,8 @@
 .debug {
     background-color: red;
 }
+
+.main-heading {
+    background-color: rgb(3, 122, 251);
+    color: white;
+}

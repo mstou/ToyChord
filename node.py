@@ -75,7 +75,7 @@ def log():
 
 @app.route('/consistency', methods=['GET'])
 def consistency_request():
-    result = {'k': K, 'consistency': consistency}
+    result = {'K': K, 'consistency': consistency}
     return jsonify(result)
 
 '''
