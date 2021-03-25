@@ -32,9 +32,7 @@ consistency = EVENTUAL if args.eventual else LINEARIZABILITY
 
 my_ip = get_ip(local = local_testing)
 
-# TODO: change this to the oceanos public IP
-# when local_testing = False
-bootstrap_node = Node('localhost', '5000')
+bootstrap_node = Node('localhost', '5000') if local_testing else Node('192.168.0.1', '5000')
 
 
 files_lock = threading.Semaphore()
@@ -715,4 +713,4 @@ if not bootstrap:
     t = threading.Thread(target=join_request, args=(bootstrap_node, my_port, my_ip))
     t.start()
 
-app.run(port=int(my_port))
+app.run(host='0.0.0.0', port=int(my_port))
