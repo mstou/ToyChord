@@ -95,7 +95,7 @@ class App extends React.Component {
   render() {
     return (
       <div className='app container-fluid w-100 d-inline-block'>
-        <h1 className='text-center mt-4 p-3'>ToyChord</h1>
+        <h1 className='main-heading text-center mt-4 p-3'>ToyChord</h1>
         <div className='p-4'>
           <div className='row'>
             <div className='col'>
