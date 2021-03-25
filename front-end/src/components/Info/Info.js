@@ -1,5 +1,4 @@
 import React from 'react';
-import { base_url } from '../constants';
 
 const Info = (props) => (
   <div className='p-3'>

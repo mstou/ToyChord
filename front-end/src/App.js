@@ -3,7 +3,7 @@ import React from 'react';
 import { Depart, Insert, Query, Log, Delete, Topology, PieChart, Info } from './components';
 import { base_url } from './components/constants';
 
-const LeftHalf = ({nodes}) => (
+const LeftHalf = ({nodes, K, consistency}) => (
   <>
     <div className='row pt-3'>
       <div className='col'>
@@ -26,7 +26,7 @@ const LeftHalf = ({nodes}) => (
         <Insert nodes={nodes}/>
       </div>
       <div className='col'>
-        <Info K={5} consistency={'Linearizability'}/>
+        <Info K={K} consistency={consistency}/>
       </div>
     </div>
   </>
@@ -42,6 +42,16 @@ const RightHalf = ({nodes, handleReload}) => (
     </div>
   </>
 );
+
+const fetchInfo = async () => {
+  const res = await fetch(`http://${base_url}/consistency`);
+  const data = await res.json();
+
+  return {
+    K: data.K,
+    consistency: data.consistency
+  };
+}
 
 const fetchNodes = async () => {
   const bootstrap = base_url;
@@ -73,15 +83,20 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      nodes: []
+      nodes: [],
+      K: 0,
+      consistency: 'linearizability'
     }
     this.handleReload = this.handleReload.bind(this);
   }
 
   async componentDidMount() {
+    const {K, consistency} = await fetchInfo();
     const nodes = await fetchNodes();
     this.setState({
-      nodes: nodes
+      nodes: nodes,
+      K,
+      consistency
     });
   }
 
@@ -102,7 +117,7 @@ class App extends React.Component {
               <RightHalf nodes={this.state.nodes} handleReload={this.handleReload}/>
             </div>
             <div className='col'>
-              <LeftHalf nodes={this.state.nodes}/>
+              <LeftHalf nodes={this.state.nodes} K={this.state.K} consistency={this.state.consistency}/>
             </div>
           </div>
         </div>
