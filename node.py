@@ -75,6 +75,11 @@ def log():
 
     return jsonify(result)
 
+@app.route('/consistency', methods=['GET'])
+def consistency_request():
+    result = {'k': K, 'consistency': consistency}
+    return jsonify(result)
+
 '''
 Notifies us that we have been successfully added to ToyChord.
 
