@@ -30,7 +30,7 @@ local_testing = args.local
 K = args.k
 consistency = EVENTUAL if args.eventual else LINEARIZABILITY
 
-my_ip = get_ip(local = local_testing)
+my_ip = get_ip(local = local_testing, port = my_port)
 
 bootstrap_node = Node('localhost', '5000') if local_testing else Node('192.168.0.1', '5000')
 
