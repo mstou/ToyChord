@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import { Depart, Insert, Query, Log, Delete, Topology, PieChart } from './components';
+import { Depart, Insert, Query, Log, Delete, Topology, PieChart, Info } from './components';
 import { base_url } from './components/constants';
 
 const LeftHalf = ({nodes}) => (
@@ -24,6 +24,9 @@ const LeftHalf = ({nodes}) => (
     <div className='row pt-3'>
       <div className='col'>
         <Insert nodes={nodes}/>
+      </div>
+      <div className='col'>
+        <Info K={5} consistency={'Linearizability'}/>
       </div>
     </div>
   </>
