@@ -49,11 +49,5 @@ python local_testing.py
  ```
  in the root directory.
 
- ## Front end deployment to heroku (for the owner of the Heroku app)
-
-You need to run 
-```
-heroku git:remote -a toychord
-git subtree push --prefix front-end heroku main
-```
-in project root level.
+ ## Front end deployment to heroku
+ Check https://surge.sh/help/getting-started-with-surge
