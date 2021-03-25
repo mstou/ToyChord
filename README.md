@@ -53,6 +53,7 @@ python local_testing.py
 
 You need to run 
 ```
+heroku git:remote -a toychord
 git subtree push --prefix front-end heroku main
 ```
 in project root level.
