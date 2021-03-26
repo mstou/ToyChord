@@ -49,5 +49,5 @@ python local_testing.py
  ```
  in the root directory.
 
- ## Front end deployment to heroku
+ ## Front end deployment
  Check https://surge.sh/help/getting-started-with-surge
