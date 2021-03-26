@@ -1,4 +1,5 @@
 import React from 'react';
+import { base_url } from '../constants';
 
 class Insert extends React.Component {
   constructor(props) {
@@ -6,7 +7,7 @@ class Insert extends React.Component {
     this.state = {
       key: '',
       value: '',
-      node: '127.0.0.1:5000'
+      node: base_url,
     };
 
     this.onKeyChange = this.onKeyChange.bind(this);
