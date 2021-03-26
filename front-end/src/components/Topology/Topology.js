@@ -31,7 +31,7 @@ function Topology(props) {
         const text = nodes[i];
         p5.circle(x, y, d);
         p5.textAlign(p5.CENTER, p5.CENTER);
-        p5.textSize(15);
+        p5.textSize(10);
         p5.text(text, x, y);
         angle = angle - theta;
       }
