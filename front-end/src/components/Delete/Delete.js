@@ -23,7 +23,7 @@ class Delete extends React.Component {
   }
 
   handleSubmit(event) {
-    const url = `http://${this.state.node}/query?key=${this.state.key}`;
+    const url = `http://${this.state.node}/delete?key=${this.state.key}`;
     fetch(url)
     .then(res => console.log(res))
     .catch(exc => console.log(exc))
