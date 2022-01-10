@@ -50,4 +50,8 @@ python local_testing.py
  in the root directory.
 
  ## Front end deployment
+ ![](front-end/toychord3.png)
+ ![](front-end/toychord2.png)
+ ![](front-end/toychord1.png)
+
  Check https://surge.sh/help/getting-started-with-surge
